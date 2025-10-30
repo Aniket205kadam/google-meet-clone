@@ -1,0 +1,107 @@
+.start-call-page {
+  width: 100vw;
+  height: 100vh;
+  background-color: #000000;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.start-heading {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 5%;
+  margin-top: 1rem;
+}
+
+.main-label {
+  font-size: 1.4rem;
+  margin-left: 0.8rem;
+}
+
+.search-icon {
+    margin-right: 0.4rem;
+}
+
+.search-option {
+  width: 95%;
+  display: flex;
+  background-color: #2a2a2a;
+  height: 6%;
+  align-items: center;
+  border-radius: 50px;
+  padding: 0.6rem;
+  color: #a0a0a0;
+  margin-top: 1rem;
+}
+
+.video-call-options {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.video-call-option {
+  background-color: rgba(105, 104, 104, 0.6);
+  margin: 1rem;
+  height: 100px;
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  color: #ffffff;
+  border: none;
+}
+
+.video-call-option:active {
+  background-color: rgba(0, 187, 255, 0.39);
+}
+
+.suggested-users-container {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.suggested-info {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0 0 2rem;
+}
+
+.suggested-users {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  overflow-y: auto;
+}
+
+.suggested-users-row {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.suggested-user {
+  width: 130px;
+  height: 130px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.sugg-profile {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}

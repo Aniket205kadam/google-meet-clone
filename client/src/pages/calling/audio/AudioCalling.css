@@ -1,0 +1,117 @@
+.audio-calling-page {
+    width: 100vw;
+    height: 100vh;
+    background-color: #202020;
+}
+
+.audio-calling-heading {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+}
+
+.audio-back-btn,
+.audio-speaker {
+    width: 60px;
+    height: 60px;
+    background-color: #383838;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.audio-call-info {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+}
+
+.audio-call-status {
+    font-size: 1rem;
+}
+
+.audio-remote-user-email {
+    font-size: 3rem;
+    margin-top: 10px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    box-sizing: border-box;
+    animation: marquee 10s linear infinite;
+}
+
+.info {
+    font-size: 1rem;
+    color: #aeadad;
+}
+
+.remote-user-picture {
+    margin-top: 5rem;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.remote-user-picture img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+}
+
+.dot-animation {
+    display: inline-block;
+    font-size: 20px;
+    letter-spacing: 3px;
+    color: #e3e3e3;
+}
+
+.dot-animation span {
+    animation: blink 1.5s infinite;
+    opacity: 0;
+}
+
+.dot-animation span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.dot-animation span:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.dot-animation span:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+@keyframes blink {
+
+    0%,
+    20% {
+        opacity: 0;
+    }
+
+    40% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}

@@ -1,0 +1,151 @@
+.before-call-page {
+    width: 100vw;
+    height: 100vh;
+    background-color: #434343;
+    display: flex;
+    flex-direction: column;
+}
+
+.before-call-heading {
+    width: 100%;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    position: fixed;
+    z-index: 100;
+}
+
+.before-call-back-btn {
+    margin-right: 1rem;
+}
+
+.remote-user {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.remote-user-info {
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    background-color: #151515;
+    height: 50px;
+    padding: 10px;
+    border-radius: 50px;
+    width: 300px;
+}
+
+.remote-user-info img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.remote-email {
+    font-size: 1.2rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.before-call-more {
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.before-call-main {
+    flex: 1;
+    background-color: #000000;
+    display: flex;
+    justify-content: center;
+}
+
+.current-user-camera-preview {
+   width: 100vw;
+   height: 100vh;
+   overflow: hidden;
+   display: flex;
+   flex-direction: column;
+   position: relative;
+
+}
+
+.current-user-camera-preview video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.current-video-option {
+    position: absolute;
+    display: flex;
+    width: 100%;
+    top: 40%;
+    justify-content: space-evenly;
+}
+
+.cv-option {
+    width: 100px;
+    height: 100px;
+    background-color: #1515157a;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.call-options {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 200px;
+    background-color: #151515ad;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.voice-call-btn {
+    width: 80px;
+    height: 80px;
+    background-color: rgba(0, 195, 255, 0.749);
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.video-call-btn {
+    width: 130px;
+    height: 80px;
+    border: 2px solid #00bbff;
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+}
+
+.video-call-btn svg {
+    margin-right: 10px;
+}
+
+.before-call-page-loading {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}

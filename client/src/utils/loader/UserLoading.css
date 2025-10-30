@@ -1,0 +1,36 @@
+.user-create-call {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+
+.name {
+    width: 95%;
+    height: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+.profile,
+.name {
+    background: linear-gradient(90deg, #6b6b6c 25%, #8b8b8b 50%, #6b6b6c 75%);
+    background-size: 200% 100%;
+    animation: loading 1.6s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+
+}

@@ -1,0 +1,47 @@
+.call-actions1 {
+    position: absolute;
+    width: 100%;
+    height: 100px;
+    bottom: 2%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.call-options1 {
+    background-color: #383838;
+    height: 100%;
+    width: 96%;
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 10px 0 10px;
+}
+
+.call-option1 {
+    width: 30%;
+    height: 80%;
+    background-color: #646464;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+}
+
+.spearate {
+    color: #a7a7a7;
+    font-size: 2rem;
+}
+
+.end-call-btn {
+    background-color: #d43a3a;
+}
+
+.off {
+    background-color: #f19f9fe0;
+}
+
+.off svg {
+    fill: #d43a3a;
+}

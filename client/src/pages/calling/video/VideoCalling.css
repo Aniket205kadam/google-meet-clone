@@ -1,0 +1,142 @@
+.video-calling-page {
+    width: 100vw;
+    height: 100vh;
+    background-color: #202020;
+    position: relative;
+    overflow: hidden;
+}
+
+.video-calling-heading {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    z-index: 1;
+    position: fixed;
+}
+
+.video-call-heading-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.video-back-btn,
+.video-speaker,
+.camera-flip {
+    width: 60px;
+    height: 60px;
+    background-color: #383838;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.video-calling-remote-user {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+    margin: 0 2px 0 2px;
+}
+
+.video-calling-remote-user-info {
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    background-color: #151515;
+    height: 60px;
+    padding: 10px;
+    border-radius: 50px;
+    max-width: 100%;
+}
+
+.video-calling-remote-user-info img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.video-calling-remote-email {
+    font-size: 1.2rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.current-user-camera-preview {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.current-user-camera-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.call-status2 {
+    width: 150px;
+    height: 60px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #151515e3;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50px;
+}
+
+.call-status-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.arrow-animate {
+    display: inline-block;
+    animation: arrowMove 1s infinite ease-in-out;
+}
+
+.vibrate {
+  display: inline-block;
+  animation: vibrate 0.15s infinite linear;
+}
+
+@keyframes vibrate {
+  0% { transform: translate(0); }
+  20% { transform: translate(-1px, 1px); }
+  40% { transform: translate(-1px, -1px); }
+  60% { transform: translate(1px, 1px); }
+  80% { transform: translate(1px, -1px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes arrowMove {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(4px, -10px);
+    }
+}

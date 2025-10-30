@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: namaskar-server
+  profiles:
+    active: dev
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 60MB
+  devtools:
+    restart:
+      enabled: false

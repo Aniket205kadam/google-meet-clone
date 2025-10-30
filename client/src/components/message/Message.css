@@ -1,0 +1,36 @@
+.message {
+    width: 100%;
+    height: fit-content;
+    color: #ffffff;
+    border-radius: 10px;
+    display: flex;
+    padding: 10px;
+    font-size: 1rem;
+    margin-top: 1rem;
+}
+
+.msg-profile {
+    width: fit-content;
+    height: fit-content;
+    margin-right: 1.2rem;
+}
+
+.msg-profile img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.msg-heading {
+    font-size: 0.9rem;
+    color: #a8a8a8;
+}
+
+.msg-sender-name {
+    color: #e1e1e1;
+    margin-right: 10px;
+}
+
+.content {
+    margin-top: 1px;
+}

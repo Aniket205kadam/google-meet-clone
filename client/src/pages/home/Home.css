@@ -1,0 +1,122 @@
+.home-page {
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.845);
+    padding: 10px;
+    overflow: hidden;
+}
+
+.search-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #000000;
+    color: #ffffff;
+    padding: 0.4rem;
+    border-radius: 50px;
+}
+
+.search-btn {
+    width: 100%;
+}
+
+.more-options {
+    margin: 0.6rem;
+    margin-top: 1rem;
+}
+
+.enter-code {
+    width: 10rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+    background-color: rgba(0, 195, 255, 0.272);
+    border-radius: 20px;
+    margin-right: 0.5rem;
+}
+
+.enter-code svg {
+    margin-right: 0.2rem;
+}
+
+.profile-image {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.add-call {
+    width: fit-content;
+    padding: 0.8rem;
+    display: flex;
+    background-color: rgba(0, 195, 255, 0.272);
+    border-radius: 1rem;
+    color: #ffffff;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    bottom: 3%;
+    right: 3%;
+}
+
+.add-call svg {
+    margin-top: 0.3rem;
+}
+
+.add-call span {
+    margin-left: 0.5rem;
+}
+
+.latest-activity {
+    width: 100%;
+    height: 100%;
+}
+
+.no-latest-activity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #ffffff;
+    position: relative;
+}
+
+.no-activity-icon {
+    width: fit-content;
+    height: fit-content;
+}
+
+.no-activity-icon svg {
+    width: 20rem;
+}
+
+.no-act-msg {
+    position: absolute;
+    bottom: 20%;
+    font-size: 1.2rem;
+    color: #868686;
+}
+
+.blur-background {
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+    background-color: rgba(0, 0, 0, 0.3);
+    animation: backgroundFade 2s forwards;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+@keyframes backgroundFade {
+    from {
+        background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    to {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+}

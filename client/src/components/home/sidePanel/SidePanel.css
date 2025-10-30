@@ -1,0 +1,39 @@
+.more-options-container {
+    width: 80vw;
+    height: 100vh;
+    background-color: #343434;
+    color: #ffffff;
+    position: absolute;
+    left: -80vw;
+    top: 0;
+    transition: left 1s ease-in-out;
+    z-index: 1000;
+}
+
+.more-options-heading {
+    width: 100%;
+    padding: 0.8rem 1.2rem 0.8rem 1.2rem;
+    font-size: 1.2rem;
+    border-bottom: 2px solid #515151;
+    font-weight: 700;
+}
+
+.option {
+    display: flex;
+    margin: 5px;
+    border-radius: 50px;
+    padding: 0.8rem;
+    font-size: 1rem;
+}
+
+.option:hover {
+    background-color: #868686;
+}
+
+.option:active {
+    background-color: #868686;
+}
+
+.option-icon svg {
+    margin-right: 0.7rem;
+}

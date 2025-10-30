@@ -1,0 +1,26 @@
+.not-found-page {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(213, 181, 138, 0.516);
+}
+
+.not-found-page button {
+    width: 200px;
+    height: 50px;
+    font-size: 1rem;
+    border-radius: 50px;
+    border: none;
+    color: #ffffff;
+    background-color: #117fc9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.not-found-page button svg {
+    margin-right: 10px;
+}

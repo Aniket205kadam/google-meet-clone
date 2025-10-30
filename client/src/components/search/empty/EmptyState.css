@@ -1,0 +1,10 @@
+.empty-state-container {
+    background-color: #d85555;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.empty-state-container p {
+    font-style: oblique;
+}
