@@ -1,6 +1,7 @@
 package dev.aniketkadam.server.webrtc;
 
 public enum CallType {
-    VIDEO,
-    AUDIO
+    CALL_REQUEST,
+    CALL_ACCEPTED,
+    CALL_REJECTED
 }

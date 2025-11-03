@@ -1,9 +1,6 @@
-import React, { useState } from "react";
 import "./CallAction.css";
 
 const CallAction = ({ camera, audio, setCamera, setAudio, endCall }) => {
-
-  console.log("audio", audio)
   return (
     <div className="call-actions1">
       <div className="call-options1">

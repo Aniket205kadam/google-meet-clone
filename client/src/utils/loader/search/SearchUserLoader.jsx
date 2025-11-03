@@ -3,7 +3,7 @@ import "./SearchUserLoader.css";
 
 const SearchUserLoader = ({ width, height, key }) => {
   return (
-    <div className="search-user-load" style={{ width, height }}>
+    <div className="search-user-load" key={key} style={{ width, height }}>
       <div className="search-profile-load"></div>
       <div className="user-info-load">
         <div className="name-load"></div>

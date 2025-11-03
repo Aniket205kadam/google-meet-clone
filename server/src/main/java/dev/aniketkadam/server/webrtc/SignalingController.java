@@ -1,20 +1,62 @@
 package dev.aniketkadam.server.webrtc;
 
+import dev.aniketkadam.server.call.CallResponse;
 import dev.aniketkadam.server.exception.OperationNotPermittedException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.security.Principal;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/v1/calls")
 @RequiredArgsConstructor
 public class SignalingController {
 
-    private final SimpMessagingTemplate messagingTemplate;
+    private final SignalingService service;
 
-    @MessageMapping("/signal")
+    @PostMapping("/call/initiate")
+    public ResponseEntity<CallResponse> initiateCall(
+            @RequestBody @Valid CallInitiationRequest request,
+            Authentication authentication
+    ) throws OperationNotPermittedException {
+        return ResponseEntity.ok(service.initiateCall(request, authentication));
+    }
+
+    @PostMapping("/call/ringing")
+    public void callRinging(
+            @RequestBody @Valid CallRingingRequest request,
+            Authentication authentication
+    ) throws OperationNotPermittedException {
+        service.callRinging(request, authentication);
+    }
+
+    @PostMapping("/call/reject/{call-id}")
+    public void callReject(
+            @PathVariable("call-id") String callId,
+            Authentication authentication
+    ) throws OperationNotPermittedException {
+        service.callReject(callId, authentication);
+    }
+
+    @PostMapping("/call/end/{call-id}")
+    public void callEnd(
+            @PathVariable("call-id") String callId,
+            Authentication authentication
+    ) throws OperationNotPermittedException {
+        service.callEnd(callId, authentication);
+    }
+
+    @PostMapping("/call/accept/{call-id}")
+    public void acceptCall(
+            @PathVariable("call-id") String callId,
+            Authentication authentication
+    ) {
+        service.callAccept(callId, authentication);
+    }
+
+    /*@MessageMapping("/signal")
     public void handleSignal(SignalPacket packet, Principal principal) throws OperationNotPermittedException {
         String sender = principal.getName(); // authenticated user
         // check authenticated username is match with requested user
@@ -22,5 +64,5 @@ public class SignalingController {
             throw new OperationNotPermittedException("User spoofing detected, In your devices malicious code detected!");
         }
         messagingTemplate.convertAndSend("/topic/incoming/call/" + packet.getTo(), packet);
-    }
+    }*/
 }

@@ -1,6 +1,8 @@
 package dev.aniketkadam.server.call;
 
 import dev.aniketkadam.server.user.User;
+import dev.aniketkadam.server.webrtc.CallMode;
+import dev.aniketkadam.server.webrtc.CallType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -19,8 +21,6 @@ public class Call {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @Column(unique = true, nullable = false, updatable = false)
-    private String callId;
     @ManyToOne
     @JoinColumn(name = "caller_id", nullable = false)
     private User caller;
@@ -30,6 +30,9 @@ public class Call {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CallStatus status;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CallMode mode;
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
 }

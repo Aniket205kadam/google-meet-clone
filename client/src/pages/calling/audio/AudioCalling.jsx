@@ -1,13 +1,21 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import "./AudioCalling.css";
 import CallAction from "../../../utils/calling/action/CallAction";
 import { useNavigate, useParams } from "react-router-dom";
 import UserService from "../../../services/UserService";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { WebSocketContext } from "../../../components/webSocket/WebSocketProvider";
+import CallService from "../../../services/CallService";
 
 const AudioCalling = () => {
   const { targetUserId } = useParams();
+  const [connectedUser, setConnectedUser] = useState({
+    id: "",
+    fullName: "",
+    email: "",
+    profile: "",
+  });
   const [targetUser, setTargetUser] = useState({
     id: "",
     fullName: "",
@@ -16,10 +24,13 @@ const AudioCalling = () => {
   });
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const [isAudioOn, setIsAudioOn] = useState(true);
-  const accessToken = useSelector((state) => state.authentication.accessToken);
+  const { accessToken } = useSelector((state) => state.authentication);
   const userService = new UserService(accessToken);
-  const [callStatus, setCallStatus] = useState("calling"); // calling, ringing
+  const [callState, setCallState] = useState("calling"); // calling, ringing
   const navigate = useNavigate();
+  const callService = new CallService(accessToken);
+  const [currentCall, setCurrentCall] = useState();
+  const { stompClient, callStatus } = useContext(WebSocketContext);
 
   const getUserById = async () => {
     try {
@@ -31,9 +42,61 @@ const AudioCalling = () => {
     }
   };
 
+  const getUserByToken = async () => {
+    try {
+      const response = await userService.fetchUserByToken(accessToken);
+      setConnectedUser(response);
+    } catch (error) {
+      toast.error("Failed to get info of connected user");
+      console.error("Failed to get info of connected user: ", error);
+    }
+  };
+
+  const sendCallInitiationRequest = async () => {
+    try {
+      const CallInitiationRequest = {
+        from: connectedUser.email,
+        to: targetUser.email,
+        mode: "AUDIO",
+      };
+      const response = await callService.initiateCall(CallInitiationRequest);
+      setCurrentCall(response);
+    } catch (error) {
+      console.error("Failed to send call request: ", error);
+      toast.warn(error?.response?.data?.message || "Something is wrong");
+      navigate("/search-users");
+    }
+  };
+
   useEffect(() => {
+    getUserByToken();
     getUserById();
   }, [targetUserId]);
+
+  useEffect(() => {
+    if (connectedUser.email.length > 0 && targetUser.email.length > 0) {
+      sendCallInitiationRequest();
+    }
+  }, [connectedUser, targetUser]);
+
+  useEffect(() => setCallState(callStatus.toLowerCase()), [callStatus]);
+
+  useEffect(() => {
+    if (
+      currentCall &&
+      stompClient.current &&
+      stompClient.current.connected &&
+      connectedUser.email.length > 0
+    ) {
+      stompClient.current.subscribe(
+        `/topic/call/reject/${currentCall.id}/${connectedUser.email}`,
+        (message) => {
+          toast.info(message);
+          navigate("/");
+        }
+      );
+    }
+  }, [stompClient, connectedUser, currentCall]);
 
   return (
     <div className="audio-calling-page">
@@ -78,7 +141,7 @@ const AudioCalling = () => {
       </div>
 
       <div className="audio-call-info">
-        {callStatus === "calling" ? (
+        {callState === "calling" ? (
           <div className="audio-call-status">
             Calling
             <p class="dot-animation">

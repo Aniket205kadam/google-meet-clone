@@ -20,6 +20,7 @@ const BeforeCall = () => {
 
   const startCamera = async () => {
     try {
+      stopCamera();
       const stream = await navigator.mediaDevices.getUserMedia({
         video: isCameraOn,
         audio: isAudioOn,
@@ -27,7 +28,17 @@ const BeforeCall = () => {
       streamRef.current = stream;
       currentUserCameraRef.current.srcObject = stream;
       await currentUserCameraRef.current.play();
-    } catch (error) {}
+    } catch (error) {
+      console.error("Failed to get access of camera!:", error);
+    }
+  };
+
+  const stopCamera = () => {
+    const stream = currentUserCameraRef.current?.srcObject;
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      currentUserCameraRef.current.srcObject = null;
+    }
   };
 
   const getUserById = async () => {
@@ -48,16 +59,13 @@ const BeforeCall = () => {
   }, [targetUserId]);
 
   useEffect(() => {
-    startCamera();
-  }, [isAudioOn, isCameraOn]);
+    if (currentUserCameraRef.current) {
+      startCamera();
+    }
+  }, [isAudioOn, isCameraOn, currentUserCameraRef.current]);
 
   useEffect(() => {
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-        streamRef.current = null;
-      }
-    };
+    return () => stopCamera();
   }, []);
 
   if (loading) {
@@ -101,7 +109,7 @@ const BeforeCall = () => {
         </div>
         <div className="before-call-main">
           <div className="current-user-camera-preview">
-            <video ref={currentUserCameraRef} />
+            <video ref={currentUserCameraRef} muted />
             <div className="current-video-option">
               <div
                 className="cv-option"

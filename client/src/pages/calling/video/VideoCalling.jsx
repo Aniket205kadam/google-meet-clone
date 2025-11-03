@@ -1,18 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import "./VideoCalling.css";
 import CallAction from "../../../utils/calling/action/CallAction";
 import { useNavigate, useParams } from "react-router-dom";
 import UserService from "../../../services/UserService";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import SockJS from "sockjs-client/dist/sockjs.js";
-import Stomp from "stompjs";
+import { WebSocketContext } from "../../../components/webSocket/WebSocketProvider";
+import CallService from "../../../services/CallService";
 
 const VideoCalling = () => {
   const { targetUserId, isVideoOn, isAudioOn } = useParams();
-
-  console.log(targetUserId, isVideoOn, isAudioOn);
-
+  const { callStatus, stompClient } = useContext(WebSocketContext);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const currentUserCameraRef = useRef(null);
   const [camera, setCamera] = useState(isVideoOn);
@@ -21,6 +19,7 @@ const VideoCalling = () => {
   const [canFlip, setCanFlip] = useState(false);
   const accessToken = useSelector((state) => state.authentication.accessToken);
   const userService = new UserService(accessToken);
+  const callService = new CallService(accessToken);
   const [connectedUser, setConnectedUser] = useState({
     id: "",
     fullName: "",
@@ -34,8 +33,8 @@ const VideoCalling = () => {
     profile: "",
   });
   const [callState, setCallState] = useState("calling"); // calling, ringing
+  const [currentCall, setCurrentCall] = useState();
   const navigate = useNavigate();
-  const stompClient = useRef(null);
 
   const startCamera = async (mode) => {
     stopCamera();
@@ -46,7 +45,9 @@ const VideoCalling = () => {
       });
       currentUserCameraRef.current.srcObject = stream;
       await currentUserCameraRef.current.play();
-    } catch (error) {}
+    } catch (error) {
+      console.error("Failed to get access of camera!");
+    }
   };
 
   const fetchUserById = async () => {
@@ -79,6 +80,7 @@ const VideoCalling = () => {
   };
 
   const stopCamera = () => {
+    console.log("Stop camera");
     const stream = currentUserCameraRef.current?.srcObject;
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
@@ -88,10 +90,6 @@ const VideoCalling = () => {
 
   const handleFlipCamera = () => {
     setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
-  };
-
-  const callEnd = () => {
-    navigate("/");
   };
 
   const getUserByToken = async () => {
@@ -104,27 +102,35 @@ const VideoCalling = () => {
     }
   };
 
-  const sendSignal = (to, type, payload) => {
-    if (!stompClient || !stompClient.current.connected) {
-      console.warn("STOMP client not connected");
-      return;
+  const sendCallInitiationRequest = async () => {
+    try {
+      const CallInitiationRequest = {
+        from: connectedUser.email,
+        to: targetUser.email,
+        mode: "VIDEO",
+      };
+      const response = await callService.initiateCall(CallInitiationRequest);
+      setCurrentCall(response);
+    } catch (error) {
+      console.error("Failed to send call request: ", error);
+      toast.warn(error?.response?.data?.message || "Something is wrong");
+      navigate("/search-users");
     }
-
-    const packet = {
-      from: connectedUser.email,
-      to,
-      callType: "VIDEO",
-      type,
-      sdp: payload?.sdp || null,
-      candidate: payload?.candidate || null,
-    };
-    stompClient.current.send("/app/signal", {}, JSON.stringify(message));
   };
 
+  const callEnd = async () => {
+    if (!currentCall.id) return;
+    await callService.endCall(currentCall.id);
+    navigate("/");
+  };
 
   useEffect(() => {
     startCamera();
   }, [camera, audio]);
+
+  useEffect(() => {
+    return () => stopCamera();
+  }, []);
 
   useEffect(() => {
     fetchUserById();
@@ -142,6 +148,42 @@ const VideoCalling = () => {
 
     return () => stopCamera();
   }, [facingMode]);
+
+  useEffect(() => setCallState(callStatus.toLowerCase()), [callStatus]);
+
+  useEffect(() => {
+    if (connectedUser.email.length > 0 && targetUser.email.length > 0) {
+      sendCallInitiationRequest();
+    }
+  }, [connectedUser, targetUser]);
+
+  useEffect(() => {
+    if (
+      currentCall &&
+      stompClient.current &&
+      stompClient.current.connected &&
+      connectedUser.email.length > 0
+    ) {
+      stompClient.current.subscribe(
+        `/topic/call/reject/${currentCall.id}/${connectedUser.email}`,
+        (message) => {
+          toast.info(message);
+          navigate("/");
+        }
+      );
+
+      stompClient.current.subscribe(
+        `/topic/call/accept/${currentCall.id}/${connectedUser.email}`,
+        (message) => {
+          console.log("Call accepted...!", message);
+          const callId = currentCall.id;
+          setCurrentCall(null);
+          navigate(`/calls/${callId}`);
+        }
+      );
+
+    }
+  }, [stompClient, connectedUser, currentCall]);
 
   return (
     <div className="video-calling-page">
@@ -212,7 +254,7 @@ const VideoCalling = () => {
       </div>
 
       <div className="current-user-camera-preview">
-        <video ref={currentUserCameraRef} />
+        <video ref={currentUserCameraRef} muted />
       </div>
 
       {callState.length > 0 && (

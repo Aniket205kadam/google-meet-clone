@@ -41,6 +41,7 @@ public class User extends BaseAuditingEntity implements UserDetails, Principal {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
     private boolean enabled;
+    private boolean isUserInCall;
     @OneToOne
     @JoinColumn(name = "profile_id")
     private ProfileImg profile;

@@ -24,6 +24,8 @@ import SockJS from "sockjs-client/dist/sockjs.js";
 import Stomp from "stompjs";
 import UserService from "./services/UserService";
 import WebSocketProvider from "./components/webSocket/WebSocketProvider";
+import IncomingVideoCall from "./pages/incoming/video/IncomingVideoCall";
+import VideoCallScreen from "./pages/videoCallScreen/VideoCallScreen";
 
 const AppRoutes = () => (
   <Routes>
@@ -76,6 +78,14 @@ const AppRoutes = () => (
       }
     />
     <Route
+      path="/demo"
+      element={
+        <ProtectedRoute>
+          <IncomingVideoCall />
+        </ProtectedRoute>
+      }
+    />
+    <Route
       path="/video-calling/:targetUserId/video/:isVideoOn/audio/:isAudioOn"
       element={
         <ProtectedRoute>
@@ -88,6 +98,14 @@ const AppRoutes = () => (
       element={
         <ProtectedRoute>
           <AudioCalling />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/calls/:callId"
+      element={
+        <ProtectedRoute>
+          <VideoCallScreen />
         </ProtectedRoute>
       }
     />

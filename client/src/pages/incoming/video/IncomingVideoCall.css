@@ -1,0 +1,123 @@
+.incoming-video-call-page {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    background-color: #363636;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    z-index: 30000;
+}
+
+.incoming-call-user {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    height: 30%;
+}
+
+.incoming-user-profile {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+}
+
+.call-info {
+    font-size: 1rem;
+    color: #c9c8c8;
+}
+
+.caller-email {
+    font-size: 2rem;
+}
+
+.incoming-call-camera {
+    flex: 1;
+    width: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+    background-color: #000000;
+    border-radius: 20px;
+    flex-direction: column;
+    position: relative;
+}
+
+.incoming-call-camera video {
+    width: 100%;
+    height: 90%;
+}
+
+.incoming-call-camera-action {
+    position: absolute;
+    bottom: 5px;
+    display: flex;
+    flex-direction: row;
+    gap: 100px;
+}
+
+.incoming-flip-camera, .incoming-video {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0, 136, 255, 0.384);
+    margin-bottom: 20px;
+    border-radius: 50%;
+}
+
+.incoming-call-answer {
+    width: 100vw;
+    height: 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.call-answer-btn {
+    width: 100px;
+    height: 100px;
+    background-color: rgba(0, 162, 255, 0.676);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    animation: updown-animation 1s infinite linear;
+}
+
+.call-answer-btn svg {
+    fill: #000000db;
+}
+
+.answer-info {
+    font-size: 1rem;
+    color: #a9a9a9;
+    animation: answer-animation 4s linear infinite;
+}
+
+@keyframes updown-animation {
+    0% {
+        transform: translateY(10px);
+    }
+
+    100% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes answer-animation {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
