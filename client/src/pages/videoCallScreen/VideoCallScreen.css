@@ -13,6 +13,14 @@
     transition: opacity 1s ease;
 }
 
+.loading-screen {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .call-screen-back-btn {
     width: 48px;
     height: 48px;

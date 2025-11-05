@@ -42,6 +42,14 @@ class CallService {
   acceptCall = async (callId) => {
     return await this.client.post(`/call/accept/${callId}`);
   };
+
+  fetchCallById = async (callId) => {
+    const response = await this.client.get(`/details/call-id/${callId}`);
+    if (response.status != 200) {
+      throw new Error("Failed to fetch call by Id");
+    }
+    return response.data;
+  }
 }
 
 export default CallService;

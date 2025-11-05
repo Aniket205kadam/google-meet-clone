@@ -18,6 +18,7 @@ public class CallResponse {
     private String id;
     private String callerId;
     private UserResponse caller;
+    private UserResponse receiver;
     private String receiverId;
     private CallStatus status;
     private CallMode mode;

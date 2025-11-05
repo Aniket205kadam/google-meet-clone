@@ -1,10 +1,29 @@
-import React, { useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import "./VideoCallScreen.css";
 import ToolBox from "../../components/videoCallScreen/toolBox/ToolBox";
 import useClickOutside from "../../hooks/useClickOutside";
 import InCallMessages from "../../components/inCallMessages/InCallMessages";
+import { useParams } from "react-router-dom";
+import PageDataLoader from "../../utils/loader/pageDataLoader/PageDataLoader";
+import { useSelector } from "react-redux";
+import CallService from "../../services/CallService";
+import { toast } from "react-toastify";
+import UserService from "../../services/UserService";
+import { WebSocketContext } from "../../components/webSocket/WebSocketProvider";
 
 const VideoCallScreen = () => {
+  const { callId } = useParams();
+  const { stompClient, isStompConnected } = useContext(WebSocketContext);
+  const [loading, setLoading] = useState(true);
+  const { accessToken } = useSelector((state) => state.authentication);
+  const callService = new CallService(accessToken);
+  const userService = new UserService(accessToken);
+  const [callInfo, setCallInfo] = useState({});
+  const [connectedUser, setConnectedUser] = useState({});
+  const [isCaller, setIsCaller] = useState();
+  const [callerUser, setCallerUser] = useState();
+  const [receiverUser, setReceiverUser] = useState({});
+
   const remoteUserImg =
     "https://images.unsplash.com/photo-1587723958656-ee042cc565a1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=687";
   const remoteUsername = "Aniket Kadam";
@@ -26,8 +45,295 @@ const VideoCallScreen = () => {
   const [isOnlyDisplayMain, setIsOnlyDisplayMain] = useState(false);
   const [isOpenMessageBox, setIsOpenMessageBox] = useState(false);
 
+  const localCameraStreamRef = useRef(null);
+  const peerRef = useRef(null);
+  const remoteCameraStreamRef = useRef(null);
+
+  const getCameraStream = async () => {
+    if (localCameraStreamRef.current) return localCameraStreamRef.current;
+    try {
+      if (localCameraStreamRef.current) {
+        localCameraStreamRef.current
+          .getTracks()
+          .forEach((track) => track.stop());
+        localCameraStreamRef.current = null;
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      localCameraStreamRef.current = stream;
+      if (localCameraStreamRef.current)
+        localCameraStreamRef.current.srcObject = stream;
+      return stream;
+    } catch (err) {
+      console.error("Error accessing camera/mic:", err);
+      toast.error("Error to access camera/mic stream.");
+    }
+  };
+
+  const fetchConnectedUser = async () => {
+    try {
+      const response = await userService.fetchUserByToken();
+      setConnectedUser(response);
+    } catch (error) {
+      toast.error("Failed to fetch connected user.");
+    }
+  };
+
+  const fetchCallById = async () => {
+    try {
+      const response = await callService.fetchCallById(callId);
+      setCallInfo(response);
+    } catch (error) {
+      toast.error("Failed to get call details");
+    }
+  };
+
+  const createPeerConnection = () => {
+    if (peerRef.current) {
+      peerRef.current.close();
+    }
+
+    const peerConnection = new RTCPeerConnection({
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" },
+      ],
+    });
+    peerRef.current = peerConnection;
+
+    if (localCameraStreamRef.current) {
+      localCameraStreamRef.current.getTracks().forEach((track) => {
+        peerConnection.addTrack(track, localCameraStreamRef.current);
+      });
+    }
+
+    peerConnection.ontrack = (event) => {
+      console.log("Remote camera access coming🎉: ", event.streams[0]);
+      if (remoteCameraStreamRef.current) {
+        remoteCameraStreamRef.current.srcObject = event.streams[0];
+
+        // console.log("Remote camera access coming🎉: ", event.streams[0]);
+
+        remoteCameraStreamRef.current.onloadedmetadata = () => {
+          remoteCameraStreamRef.current
+            .play()
+            .catch((err) => console.error("Auto-play error:", err));
+        };
+      }
+    };
+
+    // Handle ICE candidates
+    peerConnection.onicecandidate = (event) => {
+      if (event.candidate && stompClient.current?.connected) {
+        stompClient.current.send(
+          "/app/webrtc",
+          {},
+          JSON.stringify({
+            callId: callId,
+            from: connectedUser.email,
+            to: isCaller ? receiverUser.email : callerUser.email,
+            type: "candidate",
+            candidate: event.candidate,
+          })
+        );
+      }
+    };
+
+    peerConnection.onconnectionstatechange = () => {
+      console.log("Connection state:", peerConnection.connectionState);
+      if (peerConnection.connectionState === "connected") {
+      } else if (
+        peerConnection.connectionState === "disconnected" ||
+        peerConnection.connectionState === "failed"
+      ) {
+      }
+    };
+    return peerConnection;
+  };
+
+  const handleOffer = async (data) => {
+    try {
+      // Create peer connection if it doesn't exist
+      if (!peerRef.current) {
+        await getCameraStream();
+        createPeerConnection();
+      }
+
+      const peerConnection = peerRef.current;
+
+      // Set remote description
+      await peerConnection.setRemoteDescription(
+        new RTCSessionDescription({ type: "offer", sdp: data.sdp })
+      );
+
+      // Create and set local answer
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+
+      // Send answer back to caller
+      if (stompClient.current?.connected) {
+        stompClient.current.send(
+          "/app/webrtc",
+          {},
+          JSON.stringify({
+            callId: callId,
+            from: connectedUser.email,
+            to: callerUser.email,
+            type: "answer",
+            sdp: answer.sdp,
+          })
+        );
+      }
+      setLoading(true);
+    } catch (error) {
+      console.error("Error handling offer:", error);
+    }
+  };
+
+  const handleAnswer = async (data) => {
+    try {
+      if (!peerRef.current) {
+        console.warn("No peer connection for answer");
+        return;
+      }
+
+      const peerConnection = peerRef.current;
+      await peerConnection.setRemoteDescription(
+        new RTCSessionDescription({ type: "answer", sdp: data.sdp })
+      );
+      setLoading(true);
+      // console.log("Answer received and remote description set");
+    } catch (error) {
+      console.error("Error handling answer:", error);
+    }
+  };
+
+  const handleCandidate = async (data) => {
+    try {
+      if (!peerRef.current) {
+        // console.warn("Peer connection not established yet");
+        return;
+      }
+      const peerConnection = peerRef.current;
+      const candidate = new RTCIceCandidate(data.candidate);
+      await peerConnection.addIceCandidate(candidate);
+      // console.log("ICE candidate added:", candidate);
+    } catch (err) {
+      console.error("Error adding ICE candidate:", err);
+    }
+  };
+
+  const onSignal = async (data) => {
+    try {
+      console.log("Received signal:", data.type);
+
+      switch (data.type) {
+        case "offer":
+          console.log("offer come");
+          await handleOffer(data);
+          break;
+        case "answer":
+          console.log("answer come");
+          await handleAnswer(data);
+          break;
+        case "candidate":
+          console.log("candidate come");
+          await handleCandidate(data);
+          break;
+        default:
+          console.error("Unknown signal type: ", data.type);
+      }
+    } catch (error) {
+      console.error("Error processing signal:", error);
+    }
+  };
+
+  const createWebRtcConnection = async () => {
+    try {
+      await getCameraStream();
+
+      const peerConnection = createPeerConnection();
+
+      // Create offer
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+
+      if (stompClient.current?.connected) {
+        stompClient.current.send(
+          "/app/webrtc",
+          {},
+          JSON.stringify({
+            callId: callId,
+            from: connectedUser.email,
+            to: receiverUser.email,
+            type: "offer",
+            sdp: offer.sdp,
+          })
+        );
+      }
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    fetchCallById();
+    fetchConnectedUser();
+    getCameraStream();
+  }, [callId]);
+
+  useEffect(() => {
+    if (!connectedUser?.email || !callInfo?.caller) return;
+
+    const isUserCaller = connectedUser.email === callInfo.caller.email;
+    setIsCaller(isUserCaller);
+    setCallerUser(callInfo.caller);
+    setReceiverUser(callInfo.receiver);
+  }, [connectedUser, callInfo, stompClient]);
+
+  useEffect(() => {
+    const checkConnectionAndStart = async () => {
+      if (isStompConnected) {
+        if (isCaller) {
+          console.log("Send connection request");
+          await createWebRtcConnection();
+        } else {
+          console.log("Wait for connection");
+        }
+      }
+    };
+
+    checkConnectionAndStart();
+  }, [isCaller, isStompConnected]);
+
+  useEffect(() => {
+    if (
+      stompClient?.current &&
+      stompClient.current.connected &&
+      connectedUser?.email?.length > 0
+    ) {
+      stompClient.current.subscribe(
+        `/topic/webrtc/connection/${connectedUser.email}`,
+        (message) => {
+          const data = JSON.parse(message.body);
+          console.log(data);
+          onSignal(data);
+        }
+      );
+    }
+  }, [connectedUser]);
+
   // when click outside the tool box then close tool box
   useClickOutside(toolBoxRef, () => setIsToolBoxOpen(false));
+
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <PageDataLoader />
+      </div>
+    );
+  }
 
   return (
     <div className="video-call-screen-page">
@@ -120,7 +426,7 @@ const VideoCallScreen = () => {
           </div>
         ) : (
           <video
-            src="https://videos.pexels.com/video-files/32586952/13896676_2560_1440_30fps.mp4"
+            ref={remoteCameraStreamRef}
             className="remote-user-video"
           />
         )}
@@ -128,7 +434,7 @@ const VideoCallScreen = () => {
         <div className="current-user-video">
           {isCameraOn ? (
             <video
-              src="https://videos.pexels.com/video-files/26348056/11949506_2560_1440_60fps.mp4"
+              ref={localCameraStreamRef}
               className="cuser-video"
             />
           ) : (

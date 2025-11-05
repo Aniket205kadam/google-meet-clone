@@ -5,7 +5,6 @@ import dev.aniketkadam.server.exception.OperationNotPermittedException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,14 +54,4 @@ public class SignalingController {
     ) {
         service.callAccept(callId, authentication);
     }
-
-    /*@MessageMapping("/signal")
-    public void handleSignal(SignalPacket packet, Principal principal) throws OperationNotPermittedException {
-        String sender = principal.getName(); // authenticated user
-        // check authenticated username is match with requested user
-        if (!sender.equals(packet.getFrom())) {
-            throw new OperationNotPermittedException("User spoofing detected, In your devices malicious code detected!");
-        }
-        messagingTemplate.convertAndSend("/topic/incoming/call/" + packet.getTo(), packet);
-    }*/
 }

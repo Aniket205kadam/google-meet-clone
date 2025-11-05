@@ -1,5 +1,6 @@
 package dev.aniketkadam.server.webrtc;
 
+import jakarta.persistence.OneToOne;
 import lombok.*;
 
 @Getter
@@ -11,7 +12,7 @@ public class SignalPacket {
 
     private String from;
     private String to;
-    private CallType callType;
+    private String callId;
     private String type; // "offer", "answer", "candidate"
     private String sdp; // for offer/answer
     private CandidatePacket candidate;

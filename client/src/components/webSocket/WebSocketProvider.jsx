@@ -12,6 +12,7 @@ const WebSocketProvider = ({ accessToken, connectedUser, children }) => {
     data: {},
   });
   const [callStatus, setCallStatus] = useState("calling");
+  const [isStompConnected, setIsStompConnected] = useState(false);
 
   const connectWebSocket = () => {
     if (!accessToken || !connectedUser?.email) {
@@ -26,6 +27,7 @@ const WebSocketProvider = ({ accessToken, connectedUser, children }) => {
       { Authorization: `Bearer ${accessToken}` },
       (frame) => {
         console.log("WebSocket connected:", frame);
+        setIsStompConnected(true);
 
         // incoming calls
         stompClient.current.subscribe(
@@ -80,6 +82,7 @@ const WebSocketProvider = ({ accessToken, connectedUser, children }) => {
         stompClient,
         callStatus,
         setIncomingCall,
+        isStompConnected
       }}
     >
       {incomingCall.status && (
