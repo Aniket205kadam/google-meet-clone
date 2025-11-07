@@ -4,7 +4,6 @@ import ToolBox from "../../components/videoCallScreen/toolBox/ToolBox";
 import useClickOutside from "../../hooks/useClickOutside";
 import InCallMessages from "../../components/inCallMessages/InCallMessages";
 import { useParams } from "react-router-dom";
-import PageDataLoader from "../../utils/loader/pageDataLoader/PageDataLoader";
 import { useSelector } from "react-redux";
 import CallService from "../../services/CallService";
 import { toast } from "react-toastify";
@@ -19,57 +18,65 @@ const VideoCallScreen = () => {
   const callService = new CallService(accessToken);
   const userService = new UserService(accessToken);
   const [callInfo, setCallInfo] = useState({});
-  const [connectedUser, setConnectedUser] = useState({});
-  const [isCaller, setIsCaller] = useState();
-  const [callerUser, setCallerUser] = useState();
-  const [receiverUser, setReceiverUser] = useState({});
-
-  const remoteUserImg =
-    "https://images.unsplash.com/photo-1587723958656-ee042cc565a1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=687";
-  const remoteUsername = "Aniket Kadam";
+  const [connectedUser, setConnectedUser] = useState({
+    id: "",
+    fullName: "",
+    email: "",
+    profile: "",
+  });
+  const [isCaller, setIsCaller] = useState({
+    id: "",
+    fullName: "",
+    email: "",
+    profile: "",
+  });
+  const [callerUser, setCallerUser] = useState({
+    id: "",
+    fullName: "",
+    email: "",
+    profile: "",
+  });
+  const [receiverUser, setReceiverUser] = useState({
+    id: "",
+    fullName: "",
+    email: "",
+    profile: "",
+  });
   const isSoundOn = true;
-  const currentUser = {
-    profileUrl:
-      "https://images.pexels.com/photos/1704488/pexels-photo-1704488.jpeg",
-  };
-
   const isRemoteUserCameraOff = false;
-
+  const [isReceiverReady, setIsReceiverReady] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isAudioOn, setIsAudioOn] = useState(true);
-  const [isHandRaised, setIsHandRaised] = useState(true);
+  const [isHandRaised, setIsHandRaised] = useState(false);
   const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
   const toolBoxRef = useRef(null);
   const [isReactionOpen, setIsReactionOpen] = useState(false);
-
   const [isOnlyDisplayMain, setIsOnlyDisplayMain] = useState(false);
   const [isOpenMessageBox, setIsOpenMessageBox] = useState(false);
-
   const localCameraStreamRef = useRef(null);
+  const localStreamRef = useRef(null);
   const peerRef = useRef(null);
   const remoteCameraStreamRef = useRef(null);
 
   const getCameraStream = async () => {
-    if (localCameraStreamRef.current) return localCameraStreamRef.current;
     try {
-      if (localCameraStreamRef.current) {
-        localCameraStreamRef.current
-          .getTracks()
-          .forEach((track) => track.stop());
-        localCameraStreamRef.current = null;
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((track) => track.stop());
+        localStreamRef.current = null;
       }
-
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
       });
-      localCameraStreamRef.current = stream;
-      if (localCameraStreamRef.current)
+      localStreamRef.current = stream;
+      if (localCameraStreamRef.current) {
         localCameraStreamRef.current.srcObject = stream;
+        await localCameraStreamRef.current.play().catch(() => {});
+      }
       return stream;
     } catch (err) {
       console.error("Error accessing camera/mic:", err);
-      toast.error("Error to access camera/mic stream.");
+      return null;
     }
   };
 
@@ -95,7 +102,6 @@ const VideoCallScreen = () => {
     if (peerRef.current) {
       peerRef.current.close();
     }
-
     const peerConnection = new RTCPeerConnection({
       iceServers: [
         { urls: "stun:stun.l.google.com:19302" },
@@ -103,20 +109,15 @@ const VideoCallScreen = () => {
       ],
     });
     peerRef.current = peerConnection;
-
-    if (localCameraStreamRef.current) {
-      localCameraStreamRef.current.getTracks().forEach((track) => {
-        peerConnection.addTrack(track, localCameraStreamRef.current);
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((track) => {
+        peerConnection.addTrack(track, localStreamRef.current);
       });
     }
 
     peerConnection.ontrack = (event) => {
-      console.log("Remote camera access coming🎉: ", event.streams[0]);
       if (remoteCameraStreamRef.current) {
         remoteCameraStreamRef.current.srcObject = event.streams[0];
-
-        // console.log("Remote camera access coming🎉: ", event.streams[0]);
-
         remoteCameraStreamRef.current.onloadedmetadata = () => {
           remoteCameraStreamRef.current
             .play()
@@ -125,16 +126,15 @@ const VideoCallScreen = () => {
       }
     };
 
-    // Handle ICE candidates
     peerConnection.onicecandidate = (event) => {
       if (event.candidate && stompClient.current?.connected) {
         stompClient.current.send(
           "/app/webrtc",
           {},
           JSON.stringify({
-            callId: callId,
+            callId: callInfo.id,
             from: connectedUser.email,
-            to: isCaller ? receiverUser.email : callerUser.email,
+            to: isCaller ? callInfo.receiver.email : callInfo.caller.email,
             type: "candidate",
             candidate: event.candidate,
           })
@@ -143,12 +143,13 @@ const VideoCallScreen = () => {
     };
 
     peerConnection.onconnectionstatechange = () => {
-      console.log("Connection state:", peerConnection.connectionState);
       if (peerConnection.connectionState === "connected") {
+        console.log("Now video call is connected");
       } else if (
         peerConnection.connectionState === "disconnected" ||
         peerConnection.connectionState === "failed"
       ) {
+        console.log("Now video call is disconnected");
       }
     };
     return peerConnection;
@@ -156,32 +157,25 @@ const VideoCallScreen = () => {
 
   const handleOffer = async (data) => {
     try {
-      // Create peer connection if it doesn't exist
       if (!peerRef.current) {
         await getCameraStream();
         createPeerConnection();
       }
-
       const peerConnection = peerRef.current;
-
-      // Set remote description
       await peerConnection.setRemoteDescription(
         new RTCSessionDescription({ type: "offer", sdp: data.sdp })
       );
-
-      // Create and set local answer
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
 
-      // Send answer back to caller
-      if (stompClient.current?.connected) {
+      if (stompClient?.current?.connected) {
         stompClient.current.send(
           "/app/webrtc",
           {},
           JSON.stringify({
-            callId: callId,
+            callId: callInfo.id,
             from: connectedUser.email,
-            to: callerUser.email,
+            to: callInfo.caller.email,
             type: "answer",
             sdp: answer.sdp,
           })
@@ -205,7 +199,6 @@ const VideoCallScreen = () => {
         new RTCSessionDescription({ type: "answer", sdp: data.sdp })
       );
       setLoading(true);
-      // console.log("Answer received and remote description set");
     } catch (error) {
       console.error("Error handling answer:", error);
     }
@@ -213,14 +206,13 @@ const VideoCallScreen = () => {
 
   const handleCandidate = async (data) => {
     try {
-      if (!peerRef.current) {
-        // console.warn("Peer connection not established yet");
+      if (!peerRef?.current) {
+        console.warn("Peer connection not established yet");
         return;
       }
       const peerConnection = peerRef.current;
       const candidate = new RTCIceCandidate(data.candidate);
       await peerConnection.addIceCandidate(candidate);
-      // console.log("ICE candidate added:", candidate);
     } catch (err) {
       console.error("Error adding ICE candidate:", err);
     }
@@ -228,19 +220,14 @@ const VideoCallScreen = () => {
 
   const onSignal = async (data) => {
     try {
-      console.log("Received signal:", data.type);
-
       switch (data.type) {
         case "offer":
-          console.log("offer come");
           await handleOffer(data);
           break;
         case "answer":
-          console.log("answer come");
           await handleAnswer(data);
           break;
         case "candidate":
-          console.log("candidate come");
           await handleCandidate(data);
           break;
         default:
@@ -254,14 +241,11 @@ const VideoCallScreen = () => {
   const createWebRtcConnection = async () => {
     try {
       await getCameraStream();
-
       const peerConnection = createPeerConnection();
-
-      // Create offer
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
 
-      if (stompClient.current?.connected) {
+      if (stompClient?.current?.connected) {
         stompClient.current.send(
           "/app/webrtc",
           {},
@@ -274,38 +258,33 @@ const VideoCallScreen = () => {
           })
         );
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error("Failed to create WebRTC connection!");
+    }
   };
 
   useEffect(() => {
+    getCameraStream();
     fetchCallById();
     fetchConnectedUser();
-    getCameraStream();
   }, [callId]);
 
   useEffect(() => {
-    if (!connectedUser?.email || !callInfo?.caller) return;
-
-    const isUserCaller = connectedUser.email === callInfo.caller.email;
-    setIsCaller(isUserCaller);
+    if (!(connectedUser?.email?.length > 0) || !callInfo?.caller) return;
+    setIsCaller(connectedUser.email === callInfo.caller.email);
     setCallerUser(callInfo.caller);
     setReceiverUser(callInfo.receiver);
-  }, [connectedUser, callInfo, stompClient]);
+  }, [connectedUser, callInfo]);
 
   useEffect(() => {
     const checkConnectionAndStart = async () => {
-      if (isStompConnected) {
-        if (isCaller) {
-          console.log("Send connection request");
-          await createWebRtcConnection();
-        } else {
-          console.log("Wait for connection");
-        }
+      if (isCaller && isReceiverReady) {
+        await createWebRtcConnection();
       }
     };
 
     checkConnectionAndStart();
-  }, [isCaller, isStompConnected]);
+  }, [isCaller, isReceiverReady]);
 
   useEffect(() => {
     if (
@@ -317,23 +296,70 @@ const VideoCallScreen = () => {
         `/topic/webrtc/connection/${connectedUser.email}`,
         (message) => {
           const data = JSON.parse(message.body);
-          console.log(data);
           onSignal(data);
         }
       );
     }
   }, [connectedUser]);
 
+  useEffect(() => {
+    if (
+      !stompClient?.current?.connected ||
+      !connectedUser?.email ||
+      !callInfo?.id ||
+      !receiverUser?.email ||
+      !callerUser?.email
+    ) {
+      return;
+    }
+    const readySubRef = { current: false };
+    const sentReadyRef = { current: false };
+
+    if (isCaller && !readySubRef.current) {
+      readySubRef.current = true;
+      console.log(`/topic/call/${callInfo.id}/ready/${connectedUser.email}`);
+      const subscription = stompClient.current.subscribe(
+        `/topic/call/${callInfo.id}/ready/${connectedUser.email}`,
+        (message) => {
+          console.log("Receiver is ready for connection:", message);
+          setIsReceiverReady(true);
+        }
+      );
+
+      return () => {
+        subscription.unsubscribe?.();
+      };
+    }
+
+    if (!isCaller && !sentReadyRef.current) {
+      sentReadyRef.current = true;
+      (async () => {
+        await callService.receiverReady(callInfo.id);
+        console.log("Receiver sent ready signal.");
+      })();
+    }
+  }, [
+    stompClient,
+    isStompConnected,
+    connectedUser,
+    callInfo,
+    receiverUser,
+    callerUser,
+    isCaller,
+  ]);
+
+  useEffect(() => {
+    if (
+      connectedUser.email.length > 0 &&
+      callerUser.email.length > 0 &&
+      receiverUser.email.length > 0
+    ) {
+      setLoading(false);
+    }
+  }, [connectedUser, callerUser, receiverUser]);
+
   // when click outside the tool box then close tool box
   useClickOutside(toolBoxRef, () => setIsToolBoxOpen(false));
-
-  if (loading) {
-    return (
-      <div className="loading-screen">
-        <PageDataLoader />
-      </div>
-    );
-  }
 
   return (
     <div className="video-call-screen-page">
@@ -341,15 +367,8 @@ const VideoCallScreen = () => {
       {isOpenMessageBox && (
         <InCallMessages
           onClose={() => setIsOpenMessageBox(false)}
-          currentUser={{
-            profileUrl:
-              "https://plus.unsplash.com/premium_photo-1689568126014-06fea9d5d341?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600",
-          }}
-          remoteUser={{
-            fullName: "Rohit",
-            profileUrl:
-              "https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600",
-          }}
+          currentUser={connectedUser}
+          remoteUser={isCaller ? receiverUser : callerUser}
         />
       )}
 
@@ -383,10 +402,19 @@ const VideoCallScreen = () => {
               <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
             </svg>
           </button>
-          <div className="remote-user-profile">
-            <img src={remoteUserImg} className="user-profile-img" />
-            <span className="user-profile-name">{remoteUsername}</span>
-          </div>
+          {loading ? (
+            <h1>loading</h1>
+          ) : (
+            <div className="remote-user-profile">
+              <img
+                src={isCaller ? receiverUser.profile : callerUser.profile}
+                className="user-profile-img"
+              />
+              <span className="user-profile-name">
+                {isCaller ? receiverUser.fullName : callerUser.fullName}
+              </span>
+            </div>
+          )}
         </div>
         <div className="video-call-right">
           {isSoundOn ? (
@@ -422,11 +450,13 @@ const VideoCallScreen = () => {
       >
         {isRemoteUserCameraOff ? (
           <div className="remote-user-camera-off">
-            <img src={remoteUserImg} />
+            <img src={isCaller ? callerUser.profile : receiverUser.profile} />
           </div>
         ) : (
           <video
             ref={remoteCameraStreamRef}
+            autoPlay
+            playsInline
             className="remote-user-video"
           />
         )}
@@ -436,10 +466,13 @@ const VideoCallScreen = () => {
             <video
               ref={localCameraStreamRef}
               className="cuser-video"
+              autoPlay
+              playsInline
+              muted
             />
           ) : (
             <div className="curr-user-camera-off">
-              <img src={currentUser.profileUrl} />
+              <img src={connectedUser.profile} autoPlay />
             </div>
           )}
 

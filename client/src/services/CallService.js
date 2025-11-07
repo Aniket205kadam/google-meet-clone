@@ -50,6 +50,13 @@ class CallService {
     }
     return response.data;
   }
+
+  receiverReady = async (callId) => {
+    const response = await this.client.get(`/call/${callId}/receiver/ready`);
+    if (response.status != 200) {
+      throw new Error("Failed to send ready message by user");
+    }
+  }
 }
 
 export default CallService;

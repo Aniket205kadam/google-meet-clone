@@ -163,4 +163,17 @@ public class SignalingService {
                 "Call has been accepted by the " + connectedUser.getFullName() + "."
         );
     }
+
+    public void receiverReady(String callId, Authentication authentication) throws OperationNotPermittedException {
+        User connectedUser = (User) authentication.getPrincipal();
+        Call call = callRepository.findById(callId)
+                .orElseThrow(() -> new EntityNotFoundException("Call is not found with Id: " + callId));
+        if (!call.getReceiver().getEmail().equals(connectedUser.getEmail())) {
+            throw new OperationNotPermittedException("Only receiver can send ready state.");
+        }
+        messagingTemplate.convertAndSend(
+                "/topic/call/" + call.getId() + "/ready/" + call.getCaller().getEmail(),
+                "Receiver is ready for call"
+        );
+    }
 }

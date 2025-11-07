@@ -34,12 +34,13 @@
 }
 
 .remote-user-profile {
+    flex: 1;
     padding: 15px;
     height: 48px;
     background-color: #c4c4c453;
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    /* justify-content: center; */
     align-items: center;
     border-radius: 50px;
 }
@@ -69,6 +70,8 @@
 
 .video-call-left {
     display: flex;
+    flex: 1;
+    margin-right: 8px;
 }
 
 .sound-icon {

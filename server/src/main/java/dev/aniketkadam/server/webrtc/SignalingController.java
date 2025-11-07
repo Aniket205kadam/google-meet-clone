@@ -54,4 +54,12 @@ public class SignalingController {
     ) {
         service.callAccept(callId, authentication);
     }
+
+    @GetMapping("/call/{call-id}/receiver/ready")
+    public void receiverReady(
+            @PathVariable("call-id") String callId,
+            Authentication authentication
+    ) throws OperationNotPermittedException {
+        service.receiverReady(callId, authentication);
+    }
 }
