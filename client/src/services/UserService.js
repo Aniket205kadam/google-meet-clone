@@ -36,8 +36,11 @@ class UserService {
   };
 
   fetchUserByToken = async () => {
-    const { data } = await this.client.get("/fetch-user");
-    return data;
+    const response = await this.client.get("/fetch-user");
+    if (response.status != 200) {
+      throw new Error("Failed to fetch call by Id");
+    }
+    return response.data;
   };
 
   fetchSuggestedUsers = async (size = 5) => {

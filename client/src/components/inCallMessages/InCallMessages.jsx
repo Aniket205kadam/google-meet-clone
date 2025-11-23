@@ -1,130 +1,32 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./InCallMessages.css";
 import Message from "../message/Message";
+import { useSelector } from "react-redux";
+import MessageService from "../../services/MessageService";
+import { toast } from "react-toastify";
 
-const messages = [
-  {
-    content: "Hey, how are you?",
-    sender: {
-      fullName: "Alice Johnson",
-      email: "alice.johnson@example.com",
-      profileUrl: "https://randomuser.me/api/portraits/women/21.jpg",
-    },
-    createAt: new Date().toISOString().split(".")[0],
-  },
-  {
-    content: "I'm good, thanks! How about you?",
-    sender: {
-      fullName: "Bob Smith",
-      email: "bob.smith@example.com",
-      profileUrl: "https://randomuser.me/api/portraits/men/22.jpg",
-    },
-    createAt: new Date().toISOString().split(".")[0],
-  },
-  {
-    content:
-      "Doing well! Have you finished the project? It’s been really challenging with all the deadlines and requirements.",
-    sender: {
-      fullName: "Alice Johnson",
-      email: "alice.johnson@example.com",
-      profileUrl: "https://randomuser.me/api/portraits/women/21.jpg",
-    },
-    createAt: new Date().toISOString().split(".")[0],
-  },
-  {
-    content:
-      "Yes, just sent it to you via email. Let me know if you have any questions.",
-    sender: {
-      fullName: "Bob Smith",
-      email: "bob.smith@example.com",
-      profileUrl: "https://randomuser.me/api/portraits/men/22.jpg",
-    },
-    createAt: new Date().toISOString().split(".")[0],
-  },
-  {
-    content:
-      "Got it, thanks! I’ll review it tonight and provide feedback tomorrow morning.",
-    sender: {
-      fullName: "Alice Johnson",
-      email: "alice.johnson@example.com",
-      profileUrl: "https://randomuser.me/api/portraits/women/21.jpg",
-    },
-    createAt: new Date().toISOString().split(".")[0],
-  },
-  {
-    content:
-      "Perfect. By the way, did you get a chance to check the new design mockups?",
-    sender: {
-      fullName: "Bob Smith",
-      email: "bob.smith@example.com",
-      profileUrl: "https://randomuser.me/api/portraits/men/22.jpg",
-    },
-    createAt: new Date().toISOString().split(".")[0],
-  },
-  {
-    content:
-      "Yes, I saw them. I really like the color palette and layout, but I think we could improve the spacing between sections.",
-    sender: {
-      fullName: "Alice Johnson",
-      email: "alice.johnson@example.com",
-      profileUrl: "https://randomuser.me/api/portraits/women/21.jpg",
-    },
-    createAt: new Date().toISOString().split(".")[0],
-  },
-  {
-    content:
-      "Good point. I’ll adjust the spacing and share an updated version by tonight.",
-    sender: {
-      fullName: "Bob Smith",
-      email: "bob.smith@example.com",
-      profileUrl: "https://randomuser.me/api/portraits/men/22.jpg",
-    },
-    createAt: new Date().toISOString().split(".")[0],
-  },
-  {
-    content: "Thanks! Appreciate it. 😊",
-    sender: {
-      fullName: "Alice Johnson",
-      email: "alice.johnson@example.com",
-      profileUrl: "https://randomuser.me/api/portraits/women/21.jpg",
-    },
-    createAt: new Date().toISOString().split(".")[0],
-  },
-  {
-    content:
-      "No problem! By the way, are you joining the team meeting later today?",
-    sender: {
-      fullName: "Bob Smith",
-      email: "bob.smith@example.com",
-      profileUrl: "https://randomuser.me/api/portraits/men/22.jpg",
-    },
-    createAt: new Date().toISOString().split(".")[0],
-  },
-  {
-    content:
-      "Yes, I’ll be there. I hope we get to discuss the new marketing strategy as well.",
-    sender: {
-      fullName: "Alice Johnson",
-      email: "alice.johnson@example.com",
-      profileUrl: "https://randomuser.me/api/portraits/women/21.jpg",
-    },
-    createAt: new Date().toISOString().split(".")[0],
-  },
-  {
-    content: "Absolutely. It’s going to be a productive session.",
-    sender: {
-      fullName: "Bob Smith",
-      email: "bob.smith@example.com",
-      profileUrl: "https://randomuser.me/api/portraits/men/22.jpg",
-    },
-    createAt: new Date().toISOString().split(".")[0],
-  },
-];
-
-const InCallMessages = ({ currentUser, remoteUser, onClose }) => {
+const InCallMessages = ({
+  callDetails,
+  currentUser,
+  remoteUser,
+  onClose,
+  stompClient,
+  isStompConnected,
+  localStream,
+  remoteStream,
+}) => {
+  const [messages, setMessages] = useState([]);
+  const [content, setContent] = useState("");
   const [position, setPosition] = useState({ x: "50%", y: "60%" });
   const [isDragging, setIsDragging] = useState(false);
+  const { accessToken } = useSelector((state) => state.authentication);
+
   const messageMainRef = useRef(null);
+  const messageInputRef = useRef(null);
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+
+  const messageService = new MessageService(accessToken);
 
   const startDrag = (e) => {
     e.stopPropagation();
@@ -144,6 +46,42 @@ const InCallMessages = ({ currentUser, remoteUser, onClose }) => {
     newY = Math.max(0, Math.min(newY, rect.height - 100));
 
     setPosition({ x: newX, y: newY });
+  };
+
+  const fetchAllMessages = async () => {
+    try {
+      const response = await messageService.getAllMessagesByCallId(
+        callDetails.id
+      );
+      setMessages([...response]);
+    } catch (error) {
+      toast.error("Failed to fetch previous messages");
+    }
+  };
+
+  const listeningMessages = () => {
+    return stompClient.current.subscribe(
+      `/topic/call/${callDetails.id}/messages/user/${currentUser.email}`,
+      (messageResponse) => {
+        const message = JSON.parse(messageResponse.body);
+        setMessages((msgs) => [...msgs, message]);
+      }
+    );
+  };
+
+  const sendMessageToTargetUser = async () => {
+    try {
+      if (content.trim().length === 0) {
+        messageInputRef.current.focus();
+        messageInputRef.current.classList.add("input-error");
+        return;
+      }
+      const message = await messageService.sendMessage(callDetails.id, content);
+      setMessages((msgs) => [...msgs, message]);
+      setContent("");
+    } catch (error) {
+      toast.error("Failed to send error!");
+    }
   };
 
   useEffect(() => {
@@ -178,6 +116,37 @@ const InCallMessages = ({ currentUser, remoteUser, onClose }) => {
     }
   }, [messages]);
 
+  useEffect(() => {
+    fetchAllMessages();
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = localStream;
+      }
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = remoteStream;
+      }
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
+  }, []);
+
+  useEffect(() => {
+    let subscription;
+    if (isStompConnected) {
+      subscription = listeningMessages();
+    }
+    return () => subscription?.unsubscribe?.();
+  }, [isStompConnected]);
+
+  useEffect(() => {
+    if (messageInputRef.current) {
+      messageInputRef.current.classList.remove("input-error");
+    }
+  }, [content]);
+
   return (
     <div className="in-call-messages-container">
       <div className="in-call-messages-heading">
@@ -207,12 +176,12 @@ const InCallMessages = ({ currentUser, remoteUser, onClose }) => {
           }
         >
           <div className="you">
-            <img src={currentUser.profileUrl} />
+            <video ref={localVideoRef} autoPlay playsInline muted />
             <span>You</span>
           </div>
           <div className="friend">
-            <img src={remoteUser.profileUrl} />
-            <span>{remoteUser.fullName}</span>
+            <video ref={remoteVideoRef} autoPlay playsInline muted />
+            <span>{remoteUser.fullName.split(" ")[0]}</span>
           </div>
         </div>
 
@@ -223,7 +192,7 @@ const InCallMessages = ({ currentUser, remoteUser, onClose }) => {
         </div>
 
         {messages.map((message) => (
-          <Message message={message} />
+          <Message message={message} currentUser={currentUser} />
         ))}
       </div>
 
@@ -233,8 +202,11 @@ const InCallMessages = ({ currentUser, remoteUser, onClose }) => {
           className="message-input"
           placeholder="Send message"
           autoFocus
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          ref={messageInputRef}
         />
-        <button className="message-send-btn">
+        <button className="message-send-btn" onClick={sendMessageToTargetUser}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="30px"

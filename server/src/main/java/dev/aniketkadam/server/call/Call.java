@@ -1,5 +1,6 @@
 package dev.aniketkadam.server.call;
 
+import dev.aniketkadam.server.message.Message;
 import dev.aniketkadam.server.user.User;
 import dev.aniketkadam.server.webrtc.CallMode;
 import dev.aniketkadam.server.webrtc.CallType;
@@ -8,6 +9,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -33,6 +35,8 @@ public class Call {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CallMode mode;
+    @OneToMany(mappedBy = "call")
+    private List<Message> messages;
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
 }

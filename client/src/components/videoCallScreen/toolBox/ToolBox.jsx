@@ -1,7 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import "./ToolBox.css";
 
-const ToolBox = ({ ref, isHandRaised, isSoundOn, onClose, openMessageBox }) => {
+const ToolBox = ({
+  ref,
+  isHandRaised,
+  isSoundOn,
+  onClose,
+  openMessageBox,
+  isMessageUnseen,
+  setIsMessageUnseen,
+  setIsHandRaised,
+}) => {
   return (
     <div className="tool-box-container" ref={ref}>
       <div className="close-btn" onClick={onClose}></div>
@@ -9,6 +18,10 @@ const ToolBox = ({ ref, isHandRaised, isSoundOn, onClose, openMessageBox }) => {
       <div className="row1">
         <button
           className={`hand-raised ${isHandRaised ? "hand-raised-active" : ""}`}
+          onClick={() => {
+            setIsHandRaised((prev) => !prev);
+            onClose();
+          }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -71,7 +84,14 @@ const ToolBox = ({ ref, isHandRaised, isSoundOn, onClose, openMessageBox }) => {
           </div>
           <span>On the go</span>
         </div>
-        <div className="in-call-messages" onClick={openMessageBox}>
+        <div
+          className="in-call-messages"
+          onClick={() => {
+            openMessageBox();
+            setIsMessageUnseen(false);
+          }}
+        >
+          {isMessageUnseen && <div className="unseen-message1"></div>}
           <div className="in-call-messages-icon">
             <svg
               xmlns="http://www.w3.org/2000/svg"

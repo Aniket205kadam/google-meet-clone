@@ -80,7 +80,6 @@ const VideoCalling = () => {
   };
 
   const stopCamera = () => {
-    console.log("Stop camera");
     const stream = currentUserCameraRef.current?.srcObject;
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
@@ -175,7 +174,6 @@ const VideoCalling = () => {
       stompClient.current.subscribe(
         `/topic/call/accept/${currentCall.id}/${connectedUser.email}`,
         (message) => {
-          console.log("Call accepted...!", message);
           const callId = currentCall.id;
           setCurrentCall(null);
           navigate(`/calls/${callId}`);

@@ -1,6 +1,7 @@
 package dev.aniketkadam.server.webrtc;
 
 import dev.aniketkadam.server.call.CallResponse;
+import dev.aniketkadam.server.call.HandAction;
 import dev.aniketkadam.server.exception.OperationNotPermittedException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -61,5 +62,49 @@ public class SignalingController {
             Authentication authentication
     ) throws OperationNotPermittedException {
         service.receiverReady(callId, authentication);
+    }
+
+    @PostMapping("/call/finish/{call-id}")
+    public void finishCall(
+            @PathVariable("call-id") String callId,
+            Authentication authentication
+    ) throws OperationNotPermittedException {
+        service.finishCall(callId, authentication);
+    }
+
+    @GetMapping("/call/{call-id}/camera")
+    public void toggleCamera(
+            @PathVariable("call-id") String callId,
+            @RequestParam("action") String action,
+            Authentication authentication
+    ) throws OperationNotPermittedException {
+        service.toggleCamera(callId, action, authentication);
+    }
+
+    @GetMapping("/call/{call-id}/mic")
+    public void toggleMic(
+            @PathVariable("call-id") String callId,
+            @RequestParam("action") String action,
+            Authentication authentication
+    ) throws OperationNotPermittedException {
+        service.toggleMic(callId, action, authentication);
+    }
+
+    @GetMapping("/call/{call-id}/reaction")
+    public void sendReaction(
+            @PathVariable("call-id") String callId,
+            @RequestParam("emoji") String emoji,
+            Authentication authentication
+    ) throws OperationNotPermittedException {
+        service.sendReaction(callId, emoji, authentication);
+    }
+
+    @GetMapping("/call/{call-id}/hand/raised")
+    public void sendHandRaised(
+            @PathVariable("call-id") String callId,
+            @RequestParam("action") HandAction action,
+            Authentication authentication
+    ) throws OperationNotPermittedException {
+        service.sendHandRaisedOrDown(callId, action, authentication);
     }
 }

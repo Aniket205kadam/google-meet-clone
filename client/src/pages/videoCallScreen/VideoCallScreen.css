@@ -52,6 +52,44 @@
     border-radius: 50%;
 }
 
+.remote-user-img-loading {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(100deg, #cfcfcf 0%, #adadad 50%, #cfcfcf 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.remote-user-fullname-loading {
+    width: 70px;
+    height: 20px;
+    margin-left: 10px;
+    background: linear-gradient(100deg, #cfcfcf 0%, #adadad 50%, #cfcfcf 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.remote-user-fullname-loading2 {
+    width: 50px;
+    height: 20px;
+    margin-left: 5px;
+    background: linear-gradient(100deg, #cfcfcf 0%, #adadad 50%, #cfcfcf 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+
+}
+
 .user-profile-name {
     color: #ffffff;
     margin-left: 10px;
@@ -91,6 +129,8 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    z-index: 1000;
+    display: flex;
 }
 
 .current-user-video {
@@ -141,6 +181,7 @@
     align-items: center;
     pointer-events: none;
     transition: opacity 1s ease;
+    z-index: 1000000;
 
 }
 
@@ -174,6 +215,20 @@
     cursor: pointer;
 }
 
+.video-call-more-action {
+    position: relative;
+}
+
+.unseen-message {
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    background-color: #38ff5d;
+    border-radius: 50px;
+    top: 0;
+    right: 0;
+}
+
 .video-call-action:hover,
 .video-call-reaction:hover,
 .video-call-more-action:hover {
@@ -182,7 +237,7 @@
 }
 
 .reaction-tab-open {
-    background-color:   #5d8095b3;
+    background-color: #5d8095b3;
 }
 
 .call-end-btn {
@@ -238,7 +293,7 @@ svg {
 }
 
 .curr-user-camera-off img {
-    width: 50%;
+    width: 45%;
     height: 50%;
     border-radius: 50%;
 }
@@ -249,6 +304,57 @@ svg {
     display: flex;
     justify-content: center;
     align-items: center;
+    position: absolute;
+}
+
+.hand-raised-container {
+    position: absolute;
+    top: 2%;
+    right: 2%;
+    background-color: #1d71b6;
+    width: 100px;
+    padding: 6px;
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    color: #ffffff;
+}
+
+.remote-user-mic-off {
+    position: absolute;
+    top: 5%;
+    right: 5%;
+    background-color: #ffffff34;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50px;
+}
+
+.remote-user-camera-no-active {
+    width: 100%;
+    height: 100%;
+    font-family: Montserrat;
+    border: 2px solid #1d0e01;
+    background:
+        repeating-radial-gradient(#000 0 0.0001%, #ffffff 0 0.0002%) 50% 0/2500px 2500px,
+        repeating-conic-gradient(#000 0 0.0001%, #ffffff 0 0.0002%) 60% 60%/2500px 2500px;
+    background-blend-mode: difference;
+    animation: b 0.2s infinite alternate;
+    border-radius: 10px;
+    z-index: 99;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #252525;
+    letter-spacing: 0.15em;
+    text-align: center;
+
 }
 
 .remote-user-camera-off img {
@@ -296,6 +402,80 @@ svg {
 .emoji {
     margin: 5px 0 5px 0;
 }
+
+.reaction {
+  position: fixed;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  color: #ffffff;
+  z-index: 100000;
+  animation: reactionFloat 8s linear forwards;
+
+}
+
+.reaction-animation {
+  background-color: #7b7a7a;
+  padding: 10px 16px;
+  border-radius: 25px;
+  margin-bottom: 6px;
+}
+
+.reaction-name {
+  background-color: #7b7a7a;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.current-message {
+    width: 200px;
+    height: 60px;
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    color: #ffffff;
+    top: 1%;
+    left: 2%;
+    background-color: #333333c9;
+    padding: 5px;
+    border-radius: 50px;
+    pointer-events: none;
+}
+
+.current-message-sender-profile {
+    display: flex;
+    width: 30%;
+    height: 100%;
+}
+
+.sender-name {
+    font-weight: 600;
+}
+
+.current-message-sender-profile img {
+    border-radius: 50px;
+}
+
+@keyframes reactionFloat {
+  0% {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50vh) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -100vh) scale(0.9);
+    opacity: 0;
+  }
+}
+
 
 @keyframes slideUp {
     from {

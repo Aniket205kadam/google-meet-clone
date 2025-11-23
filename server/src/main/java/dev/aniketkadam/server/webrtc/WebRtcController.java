@@ -13,7 +13,6 @@ public class WebRtcController {
 
     @MessageMapping("/webrtc")
     public void handleSignal(SignalPacket packet) {
-        System.out.println("To: " + packet.getTo() + ", Type: " + packet.getType());
         messagingTemplate.convertAndSend("/topic/webrtc/connection/" + packet.getTo(), packet);
     }
 }

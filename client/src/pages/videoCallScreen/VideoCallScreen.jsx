@@ -1,50 +1,22 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import "./VideoCallScreen.css";
-import ToolBox from "../../components/videoCallScreen/toolBox/ToolBox";
-import useClickOutside from "../../hooks/useClickOutside";
-import InCallMessages from "../../components/inCallMessages/InCallMessages";
-import { useParams } from "react-router-dom";
+import { useEffect, useRef, useState, useContext } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { WebSocketContext } from "../../components/webSocket/WebSocketProvider"; // adjust path
 import CallService from "../../services/CallService";
-import { toast } from "react-toastify";
 import UserService from "../../services/UserService";
-import { WebSocketContext } from "../../components/webSocket/WebSocketProvider";
+import InCallMessages from "../../components/inCallMessages/InCallMessages";
+import ToolBox from "../../components/videoCallScreen/toolBox/ToolBox";
+import "./VideoCallScreen.css";
+import WebRtcConfig from "../../config/WebRtcConfig";
+import { toast } from "react-toastify";
+import useClickOutside from "../../hooks/useClickOutside";
+import { EmojiMap } from "../../utils/emojis/EmojiMap";
 
 const VideoCallScreen = () => {
   const { callId } = useParams();
-  const { stompClient, isStompConnected } = useContext(WebSocketContext);
-  const [loading, setLoading] = useState(true);
   const { accessToken } = useSelector((state) => state.authentication);
-  const callService = new CallService(accessToken);
-  const userService = new UserService(accessToken);
-  const [callInfo, setCallInfo] = useState({});
-  const [connectedUser, setConnectedUser] = useState({
-    id: "",
-    fullName: "",
-    email: "",
-    profile: "",
-  });
-  const [isCaller, setIsCaller] = useState({
-    id: "",
-    fullName: "",
-    email: "",
-    profile: "",
-  });
-  const [callerUser, setCallerUser] = useState({
-    id: "",
-    fullName: "",
-    email: "",
-    profile: "",
-  });
-  const [receiverUser, setReceiverUser] = useState({
-    id: "",
-    fullName: "",
-    email: "",
-    profile: "",
-  });
-  const isSoundOn = true;
-  const isRemoteUserCameraOff = false;
-  const [isReceiverReady, setIsReceiverReady] = useState(false);
+  const { stompClient, isStompConnected } = useContext(WebSocketContext);
+
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [isHandRaised, setIsHandRaised] = useState(false);
@@ -53,62 +25,100 @@ const VideoCallScreen = () => {
   const [isReactionOpen, setIsReactionOpen] = useState(false);
   const [isOnlyDisplayMain, setIsOnlyDisplayMain] = useState(false);
   const [isOpenMessageBox, setIsOpenMessageBox] = useState(false);
-  const localCameraStreamRef = useRef(null);
+  const [isSoundOn, setIsSoundOn] = useState(true);
+  const [isRemoteUserCameraOff, setIsRemoteUserCameraOff] = useState(false);
+  const [isRemoteUserMicOff, setIsRemoteUserMicOff] = useState(false);
+  const [currentReaction, setCurrentReaction] = useState({
+    emoji: null,
+    name: null,
+  });
+  const [randomValue, setRandomValue] = useState(20);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [callDetails, setCallDetails] = useState(null);
+  const [targetUser, setTargetUser] = useState(null);
+  const [currentMessage, setCurrentMessage] = useState(null);
+  const [isMessageUnseen, setIsMessageUnseen] = useState(false);
+  const [currentHandAction, setCurrentHandAction] = useState(null);
+
+  const currentUserRef = useRef(null);
+  const callDetailsRef = useRef(null);
+  const targetUserRef = useRef(null);
+  const localVideoRef = useRef(null);
   const localStreamRef = useRef(null);
-  const peerRef = useRef(null);
-  const remoteCameraStreamRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+  const remoteStreamRef = useRef(null);
+  const peerConnectionRef = useRef(null);
+  const isOpenMessageBoxRef = useRef(false);
+
+  const navigate = useNavigate();
+
+  const userService = new UserService(accessToken);
+  const callService = new CallService(accessToken);
+
+  useClickOutside(toolBoxRef, () => setIsToolBoxOpen(false));
 
   const getCameraStream = async () => {
     try {
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach((track) => track.stop());
         localStreamRef.current = null;
+
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = null;
+        }
       }
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
       });
-      localStreamRef.current = stream;
-      if (localCameraStreamRef.current) {
-        localCameraStreamRef.current.srcObject = stream;
-        await localCameraStreamRef.current.play().catch(() => {});
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
       }
+      localStreamRef.current = stream;
+
       return stream;
-    } catch (err) {
-      console.error("Error accessing camera/mic:", err);
-      return null;
+    } catch (error) {
+      console.error("Failed to get access of camera/mic:", error);
     }
   };
 
-  const fetchConnectedUser = async () => {
+  const stopCameraStream = () => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((track) => track.stop());
+      localStreamRef.current = null;
+    }
+    if (localVideoRef.current) {
+      localVideoRef.current = null;
+    }
+  };
+
+  const getCurrentUser = async () => {
     try {
       const response = await userService.fetchUserByToken();
-      setConnectedUser(response);
+      setCurrentUser(response);
+      currentUserRef.current = response;
     } catch (error) {
-      toast.error("Failed to fetch connected user.");
+      console.error("Failed to fetch current user:", response);
     }
   };
 
-  const fetchCallById = async () => {
+  const getCallDetails = async () => {
     try {
       const response = await callService.fetchCallById(callId);
-      setCallInfo(response);
+      setCallDetails(response);
+      callDetailsRef.current = response;
     } catch (error) {
-      toast.error("Failed to get call details");
+      console.error("Failed to fetch call details by ID: ", error);
     }
   };
 
-  const createPeerConnection = () => {
-    if (peerRef.current) {
-      peerRef.current.close();
+  const createPeerConnection = async () => {
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
     }
-    const peerConnection = new RTCPeerConnection({
-      iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" },
-      ],
-    });
-    peerRef.current = peerConnection;
+    const peerConnection = new RTCPeerConnection(WebRtcConfig);
+    peerConnectionRef.current = peerConnection;
+
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((track) => {
         peerConnection.addTrack(track, localStreamRef.current);
@@ -116,109 +126,61 @@ const VideoCallScreen = () => {
     }
 
     peerConnection.ontrack = (event) => {
-      if (remoteCameraStreamRef.current) {
-        remoteCameraStreamRef.current.srcObject = event.streams[0];
-        remoteCameraStreamRef.current.onloadedmetadata = () => {
-          remoteCameraStreamRef.current
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = event.streams[0];
+        remoteStreamRef.current = event.streams[0];
+
+        remoteVideoRef.current.onloadedmetadata = () => {
+          remoteVideoRef.current
             .play()
             .catch((err) => console.error("Auto-play error:", err));
         };
       }
     };
 
+    peerConnection.onconnectionstatechange = () => {
+      const state = peerConnection.connectionState;
+      if (
+        state === "disconnected" ||
+        state === "failed" ||
+        state === "closed"
+      ) {
+        endCall();
+      }
+    };
+
     peerConnection.onicecandidate = (event) => {
-      if (event.candidate && stompClient.current?.connected) {
+      if (event.candidate && isStompConnected) {
+        const candidateRequest = {
+          callId: callDetailsRef.current.id,
+          from: currentUserRef.current.email,
+          to: targetUserRef.current.email,
+          type: "candidate",
+          candidate: event.candidate,
+        };
+
         stompClient.current.send(
           "/app/webrtc",
           {},
-          JSON.stringify({
-            callId: callInfo.id,
-            from: connectedUser.email,
-            to: isCaller ? callInfo.receiver.email : callInfo.caller.email,
-            type: "candidate",
-            candidate: event.candidate,
-          })
+          JSON.stringify(candidateRequest)
         );
       }
     };
 
-    peerConnection.onconnectionstatechange = () => {
-      if (peerConnection.connectionState === "connected") {
-        console.log("Now video call is connected");
-      } else if (
-        peerConnection.connectionState === "disconnected" ||
-        peerConnection.connectionState === "failed"
-      ) {
-        console.log("Now video call is disconnected");
-      }
-    };
     return peerConnection;
   };
 
-  const handleOffer = async (data) => {
-    try {
-      if (!peerRef.current) {
-        await getCameraStream();
-        createPeerConnection();
-      }
-      const peerConnection = peerRef.current;
-      await peerConnection.setRemoteDescription(
-        new RTCSessionDescription({ type: "offer", sdp: data.sdp })
-      );
-      const answer = await peerConnection.createAnswer();
-      await peerConnection.setLocalDescription(answer);
+  const sendReadySignal = async () => {
+    await callService.receiverReady(callDetailsRef.current.id);
+  };
 
-      if (stompClient?.current?.connected) {
-        stompClient.current.send(
-          "/app/webrtc",
-          {},
-          JSON.stringify({
-            callId: callInfo.id,
-            from: connectedUser.email,
-            to: callInfo.caller.email,
-            type: "answer",
-            sdp: answer.sdp,
-          })
-        );
-      }
-      setLoading(true);
-    } catch (error) {
-      console.error("Error handling offer:", error);
+  const onPeerConnectionCreated = async () => {
+    if (currentUserRef.current.id === callDetailsRef.current.receiver.id) {
+      setTimeout(sendReadySignal, 1000);
     }
   };
 
-  const handleAnswer = async (data) => {
-    try {
-      if (!peerRef.current) {
-        console.warn("No peer connection for answer");
-        return;
-      }
-
-      const peerConnection = peerRef.current;
-      await peerConnection.setRemoteDescription(
-        new RTCSessionDescription({ type: "answer", sdp: data.sdp })
-      );
-      setLoading(true);
-    } catch (error) {
-      console.error("Error handling answer:", error);
-    }
-  };
-
-  const handleCandidate = async (data) => {
-    try {
-      if (!peerRef?.current) {
-        console.warn("Peer connection not established yet");
-        return;
-      }
-      const peerConnection = peerRef.current;
-      const candidate = new RTCIceCandidate(data.candidate);
-      await peerConnection.addIceCandidate(candidate);
-    } catch (err) {
-      console.error("Error adding ICE candidate:", err);
-    }
-  };
-
-  const onSignal = async (data) => {
+  const handleIncomingSignals = async (data) => {
     try {
       switch (data.type) {
         case "offer":
@@ -230,159 +192,385 @@ const VideoCallScreen = () => {
         case "candidate":
           await handleCandidate(data);
           break;
-        default:
-          console.error("Unknown signal type: ", data.type);
       }
-    } catch (error) {
-      console.error("Error processing signal:", error);
-    }
+    } catch (error) {}
   };
 
-  const createWebRtcConnection = async () => {
-    try {
-      await getCameraStream();
-      const peerConnection = createPeerConnection();
-      const offer = await peerConnection.createOffer();
-      await peerConnection.setLocalDescription(offer);
+  const initializeSignalingChannel = () => {
+    return stompClient.current.subscribe(
+      `/topic/webrtc/connection/${currentUser.email}`,
+      (request) => {
+        const data = JSON.parse(request.body);
+        handleIncomingSignals(data);
+      }
+    );
+  };
 
-      if (stompClient?.current?.connected) {
+  const listeningCallActions = () => {
+    return stompClient.current.subscribe(
+      `/topic/call/finish/${callId}/${currentUser.email}`,
+      (request) => {
+        toast.info("Call ended.");
+        navigate("/");
+      }
+    );
+  };
+
+  const listeningMediaActions = () => {
+    return stompClient.current.subscribe(
+      `/topic/media/${callId}/${currentUser.email}`,
+      (request) => {
+        const data = JSON.parse(request.body);
+        if (data.mediaType === "CAMERA") {
+          setIsRemoteUserCameraOff(!data.on);
+        } else if (data.mediaType === "MIC") {
+          setIsRemoteUserMicOff(!data.on);
+        } else {
+          console.error("Media action in wrong format.");
+        }
+      }
+    );
+  };
+
+  const listeningReactions = () => {
+    return stompClient.current.subscribe(
+      `/topic/reaction/${callId}/${currentUser.email}`,
+      (request) => {
+        const data = JSON.parse(request.body);
+        const value = Math.floor(Math.random() * (80 - 20 + 1)) + 20;
+        setRandomValue(value);
+        setCurrentReaction({ emoji: data.emoji, name: data.name });
+      }
+    );
+  };
+
+  const listeningMessages = () => {
+    return stompClient.current.subscribe(
+      `/topic/call/${callId}/messages/user/${currentUser.email}`,
+      (messageResponse) => {
+        const message = JSON.parse(messageResponse.body);
+        setCurrentMessage(message);
+        if (!isOpenMessageBoxRef.current) {
+          setIsMessageUnseen(true);
+        }
+      }
+    );
+  };
+
+  const listeningHandAction = () => {
+    return stompClient.current.subscribe(
+      `/topic/hand/action/${callId}/${currentUser.email}`,
+      (response) => {
+        const data = JSON.parse(response.body);
+        if (data.action === "RAISED") {
+          setCurrentHandAction(data);
+        } else if (data.action === "PUT_DOWN") {
+          setCurrentHandAction(null);
+        }
+      }
+    );
+  };
+
+  const sendOffer = async () => {
+    try {
+      if (!peerConnectionRef.current) {
+        return;
+      }
+      const offer = await peerConnectionRef.current.createOffer();
+      await peerConnectionRef.current.setLocalDescription(offer);
+
+      if (isStompConnected) {
         stompClient.current.send(
           "/app/webrtc",
           {},
           JSON.stringify({
-            callId: callId,
-            from: connectedUser.email,
-            to: receiverUser.email,
+            callId: callDetailsRef.current.id,
+            from: callDetailsRef.current.caller.email,
+            to: callDetailsRef.current.receiver.email,
             type: "offer",
             sdp: offer.sdp,
           })
         );
       }
     } catch (error) {
-      console.error("Failed to create WebRTC connection!");
+      console.error("Failed to send offer:", error);
+    }
+  };
+
+  const handleCandidate = async (data) => {
+    try {
+      if (!peerConnectionRef.current) {
+        console.warn("Peer connection not established yet");
+        return;
+      }
+      const peerConnection = peerConnectionRef.current;
+      const candidate = new RTCIceCandidate(data.candidate);
+      await peerConnection.addIceCandidate(candidate);
+    } catch (error) {
+      console.error("Failed to send ice candidate:", error);
+    }
+  };
+
+  const handleOffer = async (data) => {
+    try {
+      if (!peerConnectionRef.current) {
+        return;
+      }
+      const peerConnection = peerConnectionRef.current;
+      await peerConnection.setRemoteDescription(
+        new RTCSessionDescription({ type: "offer", sdp: data.sdp })
+      );
+
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+
+      if (isStompConnected) {
+        stompClient.current.send(
+          "/app/webrtc",
+          {},
+          JSON.stringify({
+            callId: callDetailsRef.current.id,
+            from: currentUserRef.current.email,
+            to: targetUserRef.current.email,
+            type: "answer",
+            sdp: answer.sdp,
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Failed handle offer:", error);
+    }
+  };
+
+  const cameraToggle = async () => {
+    try {
+      localStreamRef.current.getVideoTracks().forEach((track) => {
+        track.enabled = isCameraOn;
+      });
+      const action = isCameraOn ? "ON" : "OFF";
+      await callService.toggleCamera(callId, action);
+    } catch (err) {
+      console.error("Failed to toggle the camera");
+    }
+  };
+
+  const micToggle = async () => {
+    try {
+      localStreamRef.current.getAudioTracks().forEach((track) => {
+        track.enabled = isAudioOn;
+      });
+      const action = isAudioOn ? "ON" : "OFF";
+      await callService.toggleMic(callId, action);
+    } catch (error) {
+      console.error("Failed to toggle the mic");
+    }
+  };
+
+  const startAgainCameraStream = async () => {
+    if (!localStreamRef.current) return;
+    await cameraToggle();
+    await micToggle();
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+    }
+  };
+
+  const handleAnswer = async (data) => {
+    try {
+      if (!peerConnectionRef.current) {
+        return;
+      }
+      const peerConnection = peerConnectionRef.current;
+      await peerConnection.setRemoteDescription(
+        new RTCSessionDescription({ type: "answer", sdp: data.sdp })
+      );
+    } catch (error) {
+      console.error("Failed to handle answer:", error);
+    }
+  };
+
+  const endCall = async () => {
+    try {
+      await callService.finishCall(callId);
+      navigate("/");
+    } catch (error) {
+      toast.error("Unable to terminate the call.");
+    }
+  };
+
+  const sendReaction = async (emoji) => {
+    try {
+      await callService.sendUserReaction(callId, emoji);
+      const value = Math.floor(Math.random() * (80 - 20 + 1)) + 20;
+      setRandomValue(value);
+      setCurrentReaction({ emoji: emoji, name: "You" });
+    } catch (error) {
+      toast.error("Failed to send the reaction.");
     }
   };
 
   useEffect(() => {
-    getCameraStream();
-    fetchCallById();
-    fetchConnectedUser();
-  }, [callId]);
+    (async () => {
+      await getCameraStream();
+      await getCurrentUser();
+      await getCallDetails();
+    })();
+  }, []);
 
   useEffect(() => {
-    if (!(connectedUser?.email?.length > 0) || !callInfo?.caller) return;
-    setIsCaller(connectedUser.email === callInfo.caller.email);
-    setCallerUser(callInfo.caller);
-    setReceiverUser(callInfo.receiver);
-  }, [connectedUser, callInfo]);
-
-  useEffect(() => {
-    const checkConnectionAndStart = async () => {
-      if (isCaller && isReceiverReady) {
-        await createWebRtcConnection();
-      }
-    };
-
-    checkConnectionAndStart();
-  }, [isCaller, isReceiverReady]);
+    if (currentUser && callDetails) {
+      setTargetUser(
+        callDetails.caller.id === currentUser.id
+          ? callDetails.receiver
+          : callDetails.caller
+      );
+      targetUserRef.current =
+        callDetails.caller.id === currentUser.id
+          ? callDetails.receiver
+          : callDetails.caller;
+    }
+  }, [currentUser, callDetails]);
 
   useEffect(() => {
     if (
-      stompClient?.current &&
-      stompClient.current.connected &&
-      connectedUser?.email?.length > 0
+      currentUser &&
+      isStompConnected &&
+      callDetails &&
+      currentUser.id === callDetails.caller.id
     ) {
-      stompClient.current.subscribe(
-        `/topic/webrtc/connection/${connectedUser.email}`,
-        (message) => {
-          const data = JSON.parse(message.body);
-          onSignal(data);
+      let subscription = stompClient.current.subscribe(
+        `/topic/call/${callDetails.id}/ready/${currentUser.email}`,
+        (res) => {
+          sendOffer();
         }
       );
-    }
-  }, [connectedUser]);
-
-  useEffect(() => {
-    if (
-      !stompClient?.current?.connected ||
-      !connectedUser?.email ||
-      !callInfo?.id ||
-      !receiverUser?.email ||
-      !callerUser?.email
-    ) {
-      return;
-    }
-    const readySubRef = { current: false };
-    const sentReadyRef = { current: false };
-
-    if (isCaller && !readySubRef.current) {
-      readySubRef.current = true;
-      console.log(`/topic/call/${callInfo.id}/ready/${connectedUser.email}`);
-      const subscription = stompClient.current.subscribe(
-        `/topic/call/${callInfo.id}/ready/${connectedUser.email}`,
-        (message) => {
-          console.log("Receiver is ready for connection:", message);
-          setIsReceiverReady(true);
-        }
-      );
-
       return () => {
-        subscription.unsubscribe?.();
+        subscription?.unsubscribe?.();
       };
     }
-
-    if (!isCaller && !sentReadyRef.current) {
-      sentReadyRef.current = true;
-      (async () => {
-        await callService.receiverReady(callInfo.id);
-        console.log("Receiver sent ready signal.");
-      })();
-    }
-  }, [
-    stompClient,
-    isStompConnected,
-    connectedUser,
-    callInfo,
-    receiverUser,
-    callerUser,
-    isCaller,
-  ]);
+  }, [currentUser, callDetails, isStompConnected]);
 
   useEffect(() => {
-    if (
-      connectedUser.email.length > 0 &&
-      callerUser.email.length > 0 &&
-      receiverUser.email.length > 0
-    ) {
-      setLoading(false);
-    }
-  }, [connectedUser, callerUser, receiverUser]);
+    (async () => {
+      if (targetUser && callDetails && isStompConnected) {
+        const peerConnection = await createPeerConnection();
+        if (peerConnection.connectionState === "new") {
+          await onPeerConnectionCreated();
+        }
+      }
+    })();
+  }, [targetUser, callDetails, isStompConnected]);
 
-  // when click outside the tool box then close tool box
-  useClickOutside(toolBoxRef, () => setIsToolBoxOpen(false));
+  useEffect(() => {
+    let subscription;
+    let subscription2;
+    let subscription3;
+    let subscription4;
+    let subscription5;
+    let subscription6;
+    if (currentUser && isStompConnected) {
+      subscription = initializeSignalingChannel();
+      subscription2 = listeningCallActions();
+      subscription3 = listeningMediaActions();
+      subscription4 = listeningReactions();
+      subscription5 = listeningMessages();
+      subscription6 = listeningHandAction();
+    }
+    return () => {
+      subscription?.unsubscribe?.();
+      subscription2?.unsubscribe?.();
+      subscription3?.unsubscribe?.();
+      subscription4?.unsubscribe?.();
+      subscription5?.unsubscribe?.();
+      subscription6?.unsubscribe?.();
+    };
+  }, [currentUser, isStompConnected]);
+
+  useEffect(() => {
+    const handleUnload = () => {
+      endCall();
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleUnload);
+    };
+  }, []);
+
+  // before unmount the component stop camera
+  useEffect(() => {
+    return () => stopCameraStream();
+  }, []);
+
+  useEffect(() => {
+    startAgainCameraStream();
+  }, [isCameraOn, isAudioOn]);
+
+  useEffect(() => {
+    let timeoutId;
+    if (currentReaction.name?.length > 0) {
+      timeoutId = setTimeout(
+        () => setCurrentReaction({ emoji: null, name: null }),
+        8000
+      );
+    }
+    return () => clearTimeout(timeoutId);
+  }, [currentReaction.name]);
+
+  useEffect(() => {
+    let timeoutId;
+    if (currentMessage?.content?.length > 0) {
+      timeoutId = setTimeout(() => setCurrentMessage(null), 5000);
+    }
+    return () => clearTimeout(timeoutId);
+  }, [currentMessage]);
+
+  const sendHandRaisedOrDown = async () => {
+    try {
+      const action = isHandRaised ? "RAISED" : "PUT_DOWN";
+      await callService.sendUserHandAction(callId, action);
+    } catch (error) {
+      toast.error("Failed to send hand action");
+    }
+  };
+
+  useEffect(() => {
+    sendHandRaisedOrDown();
+  }, [isHandRaised]);
 
   return (
     <div className="video-call-screen-page">
-      {/* In call messages */}
       {isOpenMessageBox && (
         <InCallMessages
-          onClose={() => setIsOpenMessageBox(false)}
-          currentUser={connectedUser}
-          remoteUser={isCaller ? receiverUser : callerUser}
+          callDetails={callDetails}
+          currentUser={currentUser}
+          remoteUser={targetUser}
+          onClose={() => {
+            setIsOpenMessageBox(false);
+            isOpenMessageBoxRef.current = false;
+          }}
+          stompClient={stompClient}
+          isStompConnected={isStompConnected}
+          localStream={localStreamRef.current}
+          remoteStream={remoteStreamRef.current}
         />
       )}
 
-      {/* Tool box */}
       {isToolBoxOpen && (
         <ToolBox
           ref={toolBoxRef}
           isHandRaised={isHandRaised}
+          setIsHandRaised={setIsHandRaised}
           isSoundOn={isSoundOn}
           openMessageBox={() => {
             setIsOpenMessageBox(true);
+            isOpenMessageBoxRef.current = true;
             setIsToolBoxOpen(false);
           }}
           onClose={() => setIsToolBoxOpen(false)}
+          isMessageUnseen={isMessageUnseen}
+          setIsMessageUnseen={setIsMessageUnseen}
         />
       )}
 
@@ -402,23 +590,22 @@ const VideoCallScreen = () => {
               <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
             </svg>
           </button>
-          {loading ? (
-            <h1>loading</h1>
+          {targetUser ? (
+            <div className="remote-user-profile">
+              <img src={targetUser?.profile} className="user-profile-img" />
+              <span className="user-profile-name">{targetUser?.fullName}</span>
+            </div>
           ) : (
             <div className="remote-user-profile">
-              <img
-                src={isCaller ? receiverUser.profile : callerUser.profile}
-                className="user-profile-img"
-              />
-              <span className="user-profile-name">
-                {isCaller ? receiverUser.fullName : callerUser.fullName}
-              </span>
+              <div className="remote-user-img-loading"></div>
+              <div className="remote-user-fullname-loading"></div>
+              <div className="remote-user-fullname-loading2"></div>
             </div>
           )}
         </div>
         <div className="video-call-right">
           {isSoundOn ? (
-            <div className="sound-icon">
+            <div className="sound-icon" onClick={() => setIsSoundOn(false)}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="24px"
@@ -430,7 +617,7 @@ const VideoCallScreen = () => {
               </svg>
             </div>
           ) : (
-            <div className="volume-icon">
+            <div className="sound-icon" onClick={() => setIsSoundOn(true)}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height="24px"
@@ -448,31 +635,105 @@ const VideoCallScreen = () => {
         className="video-call-main"
         onClick={() => setIsOnlyDisplayMain((prev) => !prev)}
       >
-        {isRemoteUserCameraOff ? (
-          <div className="remote-user-camera-off">
-            <img src={isCaller ? callerUser.profile : receiverUser.profile} />
+        {currentReaction.name && (
+          <div className="reaction" style={{ left: `${randomValue}%` }}>
+            <div className="reaction-animation">
+              {EmojiMap[currentReaction.emoji]}
+            </div>
+            <div className="reaction-name">{currentReaction.name}</div>
           </div>
-        ) : (
-          <video
-            ref={remoteCameraStreamRef}
-            autoPlay
-            playsInline
-            className="remote-user-video"
-          />
         )}
+
+        {currentHandAction && (
+          <div className="hand-raised-container">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#ffffff"
+            >
+              <path d="M183-380q-8 4-16.5.5T155-391l-30-80q-5-14-4.5-27.5T133-517q25-10 46.5 7t32.5 44l16 43q3 8 .5 14.5T219-398l-36 18ZM433-80q-17 0-33.5-7T372-107L210-294q-11-13-10-29t14-27q13-11 29-9.5t27 13.5l90 103q0-8 2-15.5t6-15.5l-46-132q-5-16 2-31t23-20q16-5 31 2t20 23l39 112h23v-120q0-17 11.5-28.5T500-480q17 0 28.5 11.5T540-440v120h24l21-89q4-17 17.5-25.5T633-439q17 4 25.5 17.5T663-391l-16 71q5 1 10.5 2t10.5 3l15-39q6-16 21-23t31-1q15 6 21.5 21t.5 31l-37 98v68q0 33-23.5 56.5T640-80H433ZM311-699q-8 1-14.5-4.5T289-717l-9-79q-2-17 8.5-29.5T316-840q17-2 29.5 8.5T360-804l8 79q1 8-4.5 14.5T350-703l-39 4Zm22 204q-9 2-16.5-3t-8.5-14l-12-104q-2-17 8.5-29.5T332-660q17-2 29.5 8.5T376-624l11 97q1 8-3 14t-12 8l-39 10Zm107 335h200v-80H440v80Zm40-360q-8 0-14-6t-6-14v-100q0-17 11.5-28.5T500-680q17 0 28.5 11.5T540-640v100q0 8-6 14t-14 6h-40Zm0-200q-8 0-14-6t-6-14v-100q0-17 11.5-28.5T500-880q17 0 28.5 11.5T540-840v100q0 8-6 14t-14 6h-40Zm175 246-40-10q-8-2-12-8t-3-14l11-98q2-17 14.5-27.5T655-640q17 2 27.5 14.5T691-596l-11 105q-1 9-8.5 14t-16.5 3Zm23-201-40-4q-8-1-13.5-7.5T620-701l8-79q2-17 14.5-27.5T672-816q17 2 27.5 14.5T708-772l-8 79q-1 8-7.5 13.5T678-675Zm80 265-39-12q-8-2-11.5-9t-1.5-15l15-56q5-16 19-24.5t30-3.5q16 5 24 18.5t4 29.5l-15 58q-2 8-9.5 12t-15.5 2Zm42-151-39-10q-8-2-12-9.5t-2-15.5l13-46q7-24 17-45t31-16q25 6 30 33t-3 56l-11 39q-2 8-9 12t-15 2ZM440-160h200-200Z" />
+            </svg>
+            <span>{currentHandAction.sender.fullName.split(" ")[0]}</span>
+          </div>
+        )}
+
+        {currentMessage && (
+          <div
+            className="current-message"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsOpenMessageBox(true);
+              isOpenMessageBoxRef.current = true;
+              setIsToolBoxOpen(false);
+              setCurrentMessage(null);
+            }}
+          >
+            <div className="current-message-sender-profile">
+              <img src={currentMessage.sender.profile} />
+            </div>
+            <div className="content-area">
+              <div className="sender-name">
+                {currentMessage.sender.fullName.length > 12
+                  ? currentMessage.sender.fullName.substring(0, 10) + "..."
+                  : currentMessage.sender.fullName}
+              </div>
+              <div className="content">
+                {currentMessage.content.length > 10
+                  ? currentMessage.content.substring(0, 10) + "..."
+                  : currentMessage.content}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div
+          className="remote-user-camera-off"
+          style={isRemoteUserCameraOff ? { opacity: "1" } : { opacity: "0" }}
+        >
+          <img src={targetUser?.profile} />
+        </div>
+
+        <div
+          className="remote-user-mic-off"
+          style={isRemoteUserMicOff ? { opacity: "1" } : { opacity: "0" }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="30px"
+            viewBox="0 -960 960 960"
+            width="30px"
+            fill="#e3e3e3"
+          >
+            <path d="m710-362-58-58q14-23 21-48t7-52h80q0 44-13 83.5T710-362ZM480-594Zm112 112-72-72v-206q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v126l-80-80v-46q0-50 35-85t85-35q50 0 85 35t35 85v240q0 11-2.5 20t-5.5 18ZM440-120v-123q-104-14-172-93t-68-184h80q0 83 57.5 141.5T480-320q34 0 64.5-10.5T600-360l57 57q-29 23-63.5 39T520-243v123h-80Zm352 64L56-792l56-56 736 736-56 56Z" />
+          </svg>
+        </div>
+
+        <video
+          ref={remoteVideoRef}
+          muted={!isSoundOn}
+          autoPlay
+          playsInline
+          className="remote-user-video"
+        />
 
         <div className="current-user-video">
           {isCameraOn ? (
             <video
-              ref={localCameraStreamRef}
+              ref={localVideoRef}
               className="cuser-video"
               autoPlay
               playsInline
               muted
+              style={isOnlyDisplayMain ? { opacity: "0" } : { opacity: "1" }}
             />
           ) : (
-            <div className="curr-user-camera-off">
-              <img src={connectedUser.profile} autoPlay />
+            <div
+              className="curr-user-camera-off"
+              style={isOnlyDisplayMain ? { opacity: "0" } : { opacity: "1" }}
+            >
+              <img src={currentUser.profile} />
             </div>
           )}
 
@@ -504,7 +765,13 @@ const VideoCallScreen = () => {
             </div>
           )}
 
-          <div className="current-video-more">
+          <div
+            className="current-video-more"
+            style={isOnlyDisplayMain ? { opacity: "0" } : { opacity: "1" }}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="24px"
@@ -530,15 +797,96 @@ const VideoCallScreen = () => {
             : {}
         }
       >
-        <span className="emoji">💖</span>
-        <span className="emoji">👍</span>
-        <span className="emoji">🎉</span>
-        <span className="emoji">👏</span>
-        <span className="emoji">😂</span>
-        <span className="emoji">😯</span>
-        <span className="emoji">😥</span>
-        <span className="emoji">🤔</span>
-        <span className="emoji">👎</span>
+        <span
+          className="emoji"
+          onClick={(e) => {
+            e.stopPropagation();
+            sendReaction("💖");
+            setIsReactionOpen(false);
+          }}
+        >
+          💖
+        </span>
+        <span
+          className="emoji"
+          onClick={(e) => {
+            e.stopPropagation();
+            sendReaction("👍");
+            setIsReactionOpen(false);
+          }}
+        >
+          👍
+        </span>
+        <span
+          className="emoji"
+          onClick={(e) => {
+            e.stopPropagation();
+            sendReaction("🎉");
+            setIsReactionOpen(false);
+          }}
+        >
+          🎉
+        </span>
+        <span
+          className="emoji"
+          onClick={(e) => {
+            e.stopPropagation();
+            sendReaction("👏");
+            setIsReactionOpen(false);
+          }}
+        >
+          👏
+        </span>
+        <span
+          className="emoji"
+          onClick={(e) => {
+            e.stopPropagation();
+            sendReaction("😂");
+            setIsReactionOpen(false);
+          }}
+        >
+          😂
+        </span>
+        <span
+          className="emoji"
+          onClick={(e) => {
+            e.stopPropagation();
+            sendReaction("😯");
+            setIsReactionOpen(false);
+          }}
+        >
+          😯
+        </span>
+        <span
+          className="emoji"
+          onClick={(e) => {
+            e.stopPropagation();
+            sendReaction("😥");
+            setIsReactionOpen(false);
+          }}
+        >
+          😥
+        </span>
+        <span
+          className="emoji"
+          onClick={(e) => {
+            e.stopPropagation();
+            sendReaction("🤔");
+            setIsReactionOpen(false);
+          }}
+        >
+          🤔
+        </span>
+        <span
+          className="emoji"
+          onClick={(e) => {
+            e.stopPropagation();
+            sendReaction("👎");
+            setIsReactionOpen(false);
+          }}
+        >
+          👎
+        </span>
       </div>
 
       <div
@@ -620,6 +968,7 @@ const VideoCallScreen = () => {
             className="video-call-more-action"
             onClick={() => setIsToolBoxOpen(true)}
           >
+            {isMessageUnseen && <div className="unseen-message"></div>}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="30px"
@@ -631,7 +980,7 @@ const VideoCallScreen = () => {
             </svg>
           </div>
           <div className="separater">|</div>
-          <div className="call-end-btn">
+          <div className="call-end-btn" onClick={endCall}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="30px"

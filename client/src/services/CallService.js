@@ -49,14 +49,57 @@ class CallService {
       throw new Error("Failed to fetch call by Id");
     }
     return response.data;
-  }
+  };
 
   receiverReady = async (callId) => {
     const response = await this.client.get(`/call/${callId}/receiver/ready`);
     if (response.status != 200) {
       throw new Error("Failed to send ready message by user");
     }
-  }
+  };
+
+  finishCall = async (callId) => {
+    const response = await this.client.post(`/call/finish/${callId}`);
+    if (response.status != 200) {
+      throw new Error("Failed to finish the call");
+    }
+  };
+
+  toggleCamera = async (callId, action) => {
+    const response = await this.client.get(`/call/${callId}/camera`, {
+      params: { action },
+    });
+    if (response.status != 200) {
+      throw new Error("Failed to toggle camera");
+    }
+  };
+
+  toggleMic = async (callId, action) => {
+    const response = await this.client.get(`/call/${callId}/mic`, {
+      params: { action },
+    });
+    if (response.status != 200) {
+      throw new Error("Failed to toggle mic");
+    }
+  };
+
+  sendUserReaction = async (callId, emoji) => {
+    const response = await this.client.get(`/call/${callId}/reaction`, {
+      params: { emoji },
+    });
+    if (response.status != 200) {
+      throw new Error("Failed to send reaction");
+    }
+  };
+
+  sendUserHandAction = async (callId, action) => {
+    const response = await this.client.get(`/call/${callId}/hand/raised`, {
+      params: { action },
+    });
+    if (response.status != 200) {
+      throw new Error("Failed to send hand action");
+    }
+  };
 }
 
 export default CallService;

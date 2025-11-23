@@ -7,6 +7,11 @@
     z-index: 4000;
     display: flex;
     flex-direction: column;
+    z-index: 10000000;
+}
+
+.input-error {
+    border: 2px solid red !important;
 }
 
 .in-call-messages-heading {
@@ -121,10 +126,9 @@
     border-bottom: 2px solid #ffffff;
 }
 
-.you img,
-.friend img {
+.you video,
+.friend video {
     width: 80px;
     height: 80px;
-    border-radius: 50%;
     object-fit: cover;
 }

@@ -1,6 +1,5 @@
 package dev.aniketkadam.server.webrtc;
 
-import jakarta.persistence.OneToOne;
 import lombok.*;
 
 @Getter

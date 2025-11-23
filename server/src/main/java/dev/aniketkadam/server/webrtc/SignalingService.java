@@ -1,9 +1,6 @@
 package dev.aniketkadam.server.webrtc;
 
-import dev.aniketkadam.server.call.Call;
-import dev.aniketkadam.server.call.CallRepository;
-import dev.aniketkadam.server.call.CallResponse;
-import dev.aniketkadam.server.call.CallStatus;
+import dev.aniketkadam.server.call.*;
 import dev.aniketkadam.server.exception.OperationNotPermittedException;
 import dev.aniketkadam.server.user.User;
 import dev.aniketkadam.server.user.UserMapper;
@@ -16,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -102,7 +100,9 @@ public class SignalingService {
         User caller = call.getCaller();
         caller.setUserInCall(false);
         connectedUser.setUserInCall(false);
+        call.setStatus(CallStatus.REJECTED);
 
+        callRepository.save(call);
         userRepository.save(caller);
         userRepository.save(connectedUser);
 
@@ -173,7 +173,153 @@ public class SignalingService {
         }
         messagingTemplate.convertAndSend(
                 "/topic/call/" + call.getId() + "/ready/" + call.getCaller().getEmail(),
-                "Receiver is ready for call"
+                call.getReceiver().getEmail()
+        );
+    }
+
+    @Transactional
+    public void finishCall(String callId, Authentication authentication) throws OperationNotPermittedException {
+        User connectedUser = (User) authentication.getPrincipal();
+
+        Call call = callRepository.findById(callId)
+                .orElseThrow(() -> new EntityNotFoundException("Call not found with ID: " + callId));
+
+        String userEmail = connectedUser.getEmail();
+        boolean isCaller = call.getCaller().getEmail().equals(userEmail);
+        boolean isReceiver = call.getReceiver().getEmail().equals(userEmail);
+
+        if (!isCaller && !isReceiver) {
+            throw new OperationNotPermittedException("Only the caller or receiver can finish the call.");
+        }
+
+        // Update call status
+        call.setStatus(CallStatus.FINISH);
+        callRepository.save(call);
+
+        // Update both users
+        User caller = call.getCaller();
+        User receiver = call.getReceiver();
+        caller.setUserInCall(false);
+        receiver.setUserInCall(false);
+
+        userRepository.saveAll(List.of(caller, receiver));
+
+        // Target user (other side)
+        User targetUser = isCaller ? receiver : caller;
+
+        // Notify only the other user
+        messagingTemplate.convertAndSend(
+                "/topic/call/finish/" + call.getId() + "/" + targetUser.getEmail(),
+                "Call has been finished by " + connectedUser.getFullName() + "."
+        );
+    }
+
+    public void toggleCamera(String callId, String action, Authentication authentication) throws OperationNotPermittedException {
+        User connectedUser = (User) authentication.getPrincipal();
+        Call call = callRepository.findById(callId)
+                .orElseThrow(() -> new EntityNotFoundException("Call is not found with ID: " + callId));
+
+        String userEmail = connectedUser.getEmail();
+        boolean isCaller = call.getCaller().getEmail().equals(userEmail);
+        boolean isReceiver = call.getReceiver().getEmail().equals(userEmail);
+
+        if (!isCaller && !isReceiver) {
+            throw new OperationNotPermittedException("Only the caller or receiver send notification.");
+        }
+
+        boolean isCameraOn = action.equalsIgnoreCase("on");
+
+        User targetUser = call.getCaller().getEmail().equals(connectedUser.getEmail())
+                ? call.getReceiver()
+                : call.getCaller();
+
+        messagingTemplate.convertAndSend(
+                "/topic/media/" + call.getId() + "/" + targetUser.getEmail(),
+                MediaToggle.builder()
+                        .mediaType("CAMERA")
+                        .isOn(isCameraOn)
+                        .build()
+        );
+    }
+
+    public void toggleMic(String callId, String action, Authentication authentication) throws OperationNotPermittedException {
+        User connectedUser = (User) authentication.getPrincipal();
+        Call call = callRepository.findById(callId)
+                .orElseThrow(() -> new EntityNotFoundException("Call is not found with ID: " + callId));
+
+        String userEmail = connectedUser.getEmail();
+        boolean isCaller = call.getCaller().getEmail().equals(userEmail);
+        boolean isReceiver = call.getReceiver().getEmail().equals(userEmail);
+
+        if (!isCaller && !isReceiver) {
+            throw new OperationNotPermittedException("Only the caller or receiver send notification.");
+        }
+
+        boolean isMicOn = action.equalsIgnoreCase("on");
+
+        User targetUser = call.getCaller().getEmail().equals(connectedUser.getEmail())
+                ? call.getReceiver()
+                : call.getCaller();
+
+        messagingTemplate.convertAndSend(
+                "/topic/media/" + call.getId() + "/" + targetUser.getEmail(),
+                MediaToggle.builder()
+                        .mediaType("MIC")
+                        .isOn(isMicOn)
+                        .build()
+        );
+    }
+
+    public void sendReaction(String callId, String emoji, Authentication authentication) throws OperationNotPermittedException {
+        User connectedUser = (User) authentication.getPrincipal();
+        Call call = callRepository.findById(callId)
+                .orElseThrow(() -> new EntityNotFoundException("Call is not found with ID: " + callId));
+
+        String userEmail = connectedUser.getEmail();
+        boolean isCaller = call.getCaller().getEmail().equals(userEmail);
+        boolean isReceiver = call.getReceiver().getEmail().equals(userEmail);
+
+        if (!isCaller && !isReceiver) {
+            throw new OperationNotPermittedException("Only the caller or receiver send reaction.");
+        }
+
+        User targetUser = call.getCaller().getEmail().equals(connectedUser.getEmail())
+                ? call.getReceiver()
+                : call.getCaller();
+        String name = targetUser.getFullName().split(" ")[0];
+
+        messagingTemplate.convertAndSend(
+                "/topic/reaction/" + call.getId() + "/" + targetUser.getEmail(),
+                ReactionResponse.builder()
+                        .emoji(emoji)
+                        .name(name)
+                        .build()
+        );
+    }
+
+    public void sendHandRaisedOrDown(String callId, HandAction action, Authentication authentication) throws OperationNotPermittedException {
+        User connectedUser = (User) authentication.getPrincipal();
+        Call call = callRepository.findById(callId)
+                .orElseThrow(() -> new EntityNotFoundException("Call is not found with ID: " + callId));
+
+        String userEmail = connectedUser.getEmail();
+        boolean isCaller = call.getCaller().getEmail().equals(userEmail);
+        boolean isReceiver = call.getReceiver().getEmail().equals(userEmail);
+
+        if (!isCaller && !isReceiver) {
+            throw new OperationNotPermittedException("Only the caller or receiver send reaction.");
+        }
+
+        User targetUser = call.getCaller().getEmail().equals(connectedUser.getEmail())
+                ? call.getReceiver()
+                : call.getCaller();
+
+        messagingTemplate.convertAndSend(
+                "/topic/hand/action/" + call.getId() + "/" + targetUser.getEmail(),
+                HandActionResponse.builder()
+                        .action(action)
+                        .sender(userMapper.toUserResponse(connectedUser))
+                        .build()
         );
     }
 }

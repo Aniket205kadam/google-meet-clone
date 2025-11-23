@@ -2,13 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useTimeAgo } from "../../hooks/useTimeAgo";
 import "./Message.css";
 
-const Message = ({ message }) => {
-  const createdAt = useTimeAgo(message.createAt);
+const Message = ({ message, currentUser }) => {
+  const createdAt = useTimeAgo(message.createdAt);
+  const isOwnMessage = currentUser.email === message.sender.email;
 
   return (
-    <div className="message" key={message.createAt}>
+    <div
+      className={`message ${isOwnMessage ? "own-message" : ""}`}
+      key={message.id}
+    >
       <div className="msg-profile">
-        <img src={message.sender.profileUrl} />
+        <img src={message.sender.profile} />
       </div>
       <div className="msg-content">
         <div className="msg-heading">

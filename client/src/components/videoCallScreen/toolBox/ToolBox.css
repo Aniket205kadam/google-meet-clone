@@ -11,6 +11,7 @@
     flex-direction: column;
     padding: 20px;
     animation: slideUp 0.4s ease-out;
+    z-index: 10000000;
 }
 
 @media(max-width: 500px) {
@@ -91,6 +92,17 @@
     background-color: #878787;
     border-radius: 50px;
     color: #ffffff;
+    position: relative;
+}
+
+.unseen-message1 {
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    background-color: #38ff5d;
+    border-radius: 50px;
+    top: 2%;
+    right: 6%;
 }
 
 .in-call-messages-icon {
