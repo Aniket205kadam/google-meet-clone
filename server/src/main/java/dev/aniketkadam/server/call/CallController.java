@@ -1,13 +1,13 @@
 package dev.aniketkadam.server.call;
 
 import dev.aniketkadam.server.exception.OperationNotPermittedException;
+import dev.aniketkadam.server.pagination.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/calls/details")
@@ -22,6 +22,15 @@ public class CallController {
             Authentication authentication
     ) throws OperationNotPermittedException {
       return ResponseEntity.ok(service.getCallById(callId, authentication));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<PageResponse<CallResponse>> getAllCallHistory(
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "5", required = false) int size,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(service.getAllCallHistory(page, size, authentication));
     }
 
 }

@@ -1,0 +1,56 @@
+.call-history-item {
+    width: 98%;
+    padding: 1rem;
+    background-color: #52bbef54;
+    display: flex;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+}
+
+.call-history-info {
+    width: 90%;
+    display: flex;
+}
+
+.call-history-profile {
+    width: 20%;
+    display: flex;
+}
+
+.call-history-profile img {
+    width: 100%;
+    border-radius: 50px;
+    object-fit: cover;
+}
+
+.call-history-target-info {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+}
+
+.call-history-email {
+    font-weight: 500;
+}
+
+.call-meta-data {
+    display: flex;
+    flex-direction: row;
+    font-size: .8rem;
+    align-items: center;
+    gap: 10px;
+}
+
+.call-status div {
+    display: flex;
+    align-items: center;
+}
+
+.history-more-option {
+    width: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}

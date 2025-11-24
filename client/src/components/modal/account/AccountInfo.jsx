@@ -37,7 +37,7 @@ const AccountInfo = ({ profileImg, fullName, email, onClose, ref }) => {
                 </div>
               </div>
               <div className="user-name">
-                <span className="name">{fullName}</span>
+                <span className="name1">{fullName}</span>
                 <span className="email">{email}</span>
               </div>
             </div>

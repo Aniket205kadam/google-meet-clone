@@ -100,6 +100,14 @@ class CallService {
       throw new Error("Failed to send hand action");
     }
   };
+
+  fetchCallHistory = async (page, size) => {
+    const response = await this.client.get("/details/all", { params: { page, size } });
+    if (response.status != 200) {
+      throw new Error("Failed to fetch calls");
+    }
+    return response.data;
+  };
 }
 
 export default CallService;

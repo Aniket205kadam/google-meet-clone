@@ -1,74 +1,37 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./StartCall.css";
 import UserLoading from "../../utils/loader/UserLoading";
 import CreateLink from "../../components/startCall/createLink/CreateLink";
 import useClickOutside from "../../hooks/useClickOutside";
 import { useNavigate } from "react-router-dom";
+import UserService from "../../services/UserService";
+import { useSelector } from "react-redux";
 
 const StartCall = () => {
-  //   const [suggestedUsers, setSuggestedUsers] = useState([
-  //     {
-  //       profileUrl: "https://randomuser.me/api/portraits/men/21.jpg",
-  //       fullName: "Lucas Perry",
-  //       email: "lucas.perry@example.com",
-  //       mobileNumber: "+1 555-454-5656",
-  //     },
-  //     {
-  //       profileUrl: "https://randomuser.me/api/portraits/women/22.jpg",
-  //       fullName: "Ella Bennett",
-  //       email: "ella.bennett@example.com",
-  //       mobileNumber: "+1 555-565-6767",
-  //     },
-  //     {
-  //       profileUrl: "https://randomuser.me/api/portraits/men/23.jpg",
-  //       fullName: "Henry Carter",
-  //       email: "henry.carter@example.com",
-  //       mobileNumber: "+1 555-676-7878",
-  //     },
-  //     {
-  //       profileUrl: "https://randomuser.me/api/portraits/women/24.jpg",
-  //       fullName: "Lily Morgan",
-  //       email: "lily.morgan@example.com",
-  //       mobileNumber: "+1 555-787-8989",
-  //     },
-  //     {
-  //       profileUrl: "https://randomuser.me/api/portraits/men/25.jpg",
-  //       fullName: "Sebastian Brooks",
-  //       email: "sebastian.brooks@example.com",
-  //       mobileNumber: "+1 555-898-9090",
-  //     },
-  //     {
-  //       profileUrl: "https://randomuser.me/api/portraits/women/26.jpg",
-  //       fullName: "Chloe Foster",
-  //       email: "chloe.foster@example.com",
-  //       mobileNumber: "+1 555-909-1010",
-  //     },
-  //     {
-  //       profileUrl: "https://randomuser.me/api/portraits/men/27.jpg",
-  //       fullName: "Nathan Hughes",
-  //       email: "nathan.hughes@example.com",
-  //       mobileNumber: "+1 555-101-1121",
-  //     },
-  //     {
-  //       profileUrl: "https://randomuser.me/api/portraits/women/28.jpg",
-  //       fullName: "Grace Simmons",
-  //       email: "grace.simmons@example.com",
-  //       mobileNumber: "+1 555-212-2232",
-  //     },
-  //     {
-  //       profileUrl: "https://randomuser.me/api/portraits/men/29.jpg",
-  //       fullName: "Oliver James",
-  //       email: "oliver.james@example.com",
-  //       mobileNumber: "+1 555-323-3343",
-  //     },
-  //   ]);
-
   const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [isCreateLinkClick, setIsCreateLinkClick] = useState(false);
+
   const createLinkRef = useRef(null);
   const navigate = useNavigate();
+  const { accessToken } = useSelector((state) => state.authentication);
+
+  const userService = new UserService(accessToken);
 
   useClickOutside(createLinkRef, () => setIsCreateLinkClick(false));
+
+  const getSuggestedUser = async () => {
+    try {
+      const response = await userService.fetchSuggestedUsers(9);
+      console.log(response);
+      setSuggestedUsers(response);
+    } catch (error) {
+      console.error("Failed to fetch suggested user");
+    }
+  };
+
+  useEffect(() => {
+    getSuggestedUser();
+  }, []);
 
   return (
     <div className="start-call-page">
@@ -199,43 +162,78 @@ const StartCall = () => {
         ) : (
           <div className="suggested-users">
             <div className="suggested-users-row">
-              {suggestedUsers.slice(0, 3).map((user, idx) => (
-                <div className="suggested-user" key={idx}>
-                  <img
-                    className="sugg-profile"
-                    src={user.profileUrl}
-                    alt={user.fullName}
-                  />
-                  <span className="suggested-user-name">{user.fullName}</span>
-                </div>
-              ))}
+              {suggestedUsers
+                .slice(
+                  0,
+                  suggestedUsers.length >= 3 ? 3 : suggestedUsers.length
+                )
+                .map((user, idx) => (
+                  <div
+                    className="suggested-user"
+                    key={idx}
+                    onClick={() => navigate(`/before-call/${user.id}`)}
+                  >
+                    <img
+                      className="sugg-profile"
+                      src={user.profile}
+                      alt={user.fullName}
+                    />
+                    <span className="suggested-user-name">{user.fullName}</span>
+                  </div>
+                ))}
             </div>
 
-            <div className="suggested-users-row">
-              {suggestedUsers.slice(3, 6).map((user, idx) => (
-                <div className="suggested-user" key={idx}>
-                  <img
-                    className="sugg-profile"
-                    src={user.profileUrl}
-                    alt={user.fullName}
-                  />
-                  <span className="suggested-user-name">{user.fullName}</span>
-                </div>
-              ))}
-            </div>
+            {suggestedUsers.length > 3 && (
+              <div className="suggested-users-row">
+                {suggestedUsers
+                  .slice(
+                    3,
+                    suggestedUsers.length >= 6 ? 6 : suggestedUsers.length
+                  )
+                  .map((user, idx) => (
+                    <div
+                      className="suggested-user"
+                      key={idx}
+                      onClick={() => navigate(`/before-call/${user.id}`)}
+                    >
+                      <img
+                        className="sugg-profile"
+                        src={user.profile}
+                        alt={user.fullName}
+                      />
+                      <span className="suggested-user-name">
+                        {user.fullName}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            )}
 
-            <div className="suggested-users-row">
-              {suggestedUsers.slice(6, 9).map((user, idx) => (
-                <div className="suggested-user" key={idx}>
-                  <img
-                    className="sugg-profile"
-                    src={user.profileUrl}
-                    alt={user.fullName}
-                  />
-                  <span className="suggested-user-name">{user.fullName}</span>
-                </div>
-              ))}
-            </div>
+            {suggestedUsers.length > 6 && (
+              <div className="suggested-users-row">
+                {suggestedUsers
+                  .slice(
+                    6,
+                    suggestedUsers.length >= 9 ? 9 : suggestedUsers.length
+                  )
+                  .map((user, idx) => (
+                    <div
+                      className="suggested-user"
+                      key={idx}
+                      onClick={() => navigate(`/before-call/${user.id}`)}
+                    >
+                      <img
+                        className="sugg-profile"
+                        src={user.profile}
+                        alt={user.fullName}
+                      />
+                      <span className="suggested-user-name">
+                        {user.fullName}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
         )}
       </div>

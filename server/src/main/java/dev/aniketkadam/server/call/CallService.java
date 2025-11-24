@@ -1,11 +1,18 @@
 package dev.aniketkadam.server.call;
 
 import dev.aniketkadam.server.exception.OperationNotPermittedException;
+import dev.aniketkadam.server.pagination.PageResponse;
 import dev.aniketkadam.server.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,5 +33,21 @@ public class CallService {
 
     private boolean isUserParticipantOfCall(User user, Call call) {
         return (user.getEmail().equals(call.getReceiver().getEmail()) || user.getEmail().equals(call.getCaller().getEmail()));
+    }
+
+    public PageResponse<CallResponse> getAllCallHistory(int page, int size, Authentication authentication) {
+        User connectedUser = (User) authentication.getPrincipal();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("startedAt").descending());
+        Page<Call> calls = repository.findUserAllCalls(pageable, connectedUser.getId());
+        List<CallResponse> callResponses = calls.stream().map(callMapper::toCallResponse).toList();
+        return PageResponse.<CallResponse>builder()
+                .content(callResponses)
+                .number(calls.getNumber())
+                .size(calls.getSize())
+                .totalElements(calls.getTotalElements())
+                .totalPages(calls.getTotalPages())
+                .first(calls.isFirst())
+                .last(calls.isLast())
+                .build();
     }
 }

@@ -78,7 +78,7 @@ const BeforeCall = () => {
     return (
       <div className="before-call-page">
         <div className="before-call-heading">
-          <div className="before-call-back-btn" onClick={() => navigate("/")}>
+          <div className="before-call-back-btn" onClick={() => navigate(-1)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="30px"
