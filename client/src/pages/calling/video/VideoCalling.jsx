@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { WebSocketContext } from "../../../components/webSocket/WebSocketProvider";
 import CallService from "../../../services/CallService";
+import calling from "../../../assets/music/calling.mp3";
 
 const VideoCalling = () => {
   const { targetUserId, isVideoOn, isAudioOn } = useParams();
@@ -157,6 +158,16 @@ const VideoCalling = () => {
   }, [connectedUser, targetUser]);
 
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      callEnd();
+    }, 30000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
+  useEffect(() => {
     if (
       currentCall &&
       stompClient.current &&
@@ -179,12 +190,12 @@ const VideoCalling = () => {
           navigate(`/calls/${callId}`);
         }
       );
-
     }
   }, [stompClient, connectedUser, currentCall]);
 
   return (
     <div className="video-calling-page">
+      <audio src={calling} autoPlay loop />
       <div className="video-calling-heading">
         <div className="video-back-btn">
           <svg

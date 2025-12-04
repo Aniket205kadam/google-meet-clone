@@ -287,7 +287,8 @@
 }
 
 .call-actions-btn1 {
-    width: 95%;
+    width: fit-content;
+    padding: 10px;
     max-width: 600px;
     height: 100%;
     background: rgba(40, 40, 40, 0.55);

@@ -403,7 +403,6 @@ const MeetingScreen = ({ meetingCode }) => {
     setParticipantInfo((prevParticipants) =>
       prevParticipants.filter((p) => p.user.id !== participant.user.id)
     );
-    console.log("User remove:", participant);
     setIsShowToast({
       isShow: true,
       image: participant.user.profile,
@@ -463,6 +462,30 @@ const MeetingScreen = ({ meetingCode }) => {
       }
     );
   };
+
+  const toggleTracks = (type, isEnabled) => {
+    try {
+      if (type === "video") {
+        currentVideoStreamRef.current.getVideoTracks().forEach((track) => {
+          track.enabled = isEnabled;
+        });
+
+        cure;
+      } else {
+        currentVideoStreamRef.current.getAudioTracks().forEach((track) => {
+          track.enabled = isEnabled;
+        });
+      }
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    toggleTracks("video", isCameraOn);
+  }, [isCameraOn, participantInfo]);
+
+  useEffect(() => {
+    toggleTracks("audio", isAudioOn);
+  }, [isAudioOn, participantInfo]);
 
   useEffect(() => {
     const handleUnload = () => {
@@ -532,7 +555,13 @@ const MeetingScreen = ({ meetingCode }) => {
               <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
             </svg>
           </div>
-          <div className="meeting-code">
+          <div
+            className="meeting-code"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsShowParticipantsInfo(true);
+            }}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="24px"
@@ -546,17 +575,31 @@ const MeetingScreen = ({ meetingCode }) => {
           </div>
         </div>
         <div className="meeting-screen-heading-right">
-          <div className="meeting-sound-btn meet-heading-btn">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="#e3e3e3"
-            >
-              <path d="M560-131v-82q90-26 145-100t55-168q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 127-78 224.5T560-131ZM120-360v-240h160l200-200v640L280-360H120Zm440 40v-322q47 22 73.5 66t26.5 96q0 51-26.5 94.5T560-320ZM400-606l-86 86H200v80h114l86 86v-252ZM300-480Z" />
-            </svg>
-            {/* <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M792-56 671-177q-25 16-53 27.5T560-131v-82q14-5 27.5-10t25.5-12L480-368v208L280-360H120v-240h128L56-792l56-56 736 736-56 56Zm-8-232-58-58q17-31 25.5-65t8.5-70q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 53-14.5 102T784-288ZM650-422l-90-90v-130q47 22 73.5 66t26.5 96q0 15-2.5 29.5T650-422ZM480-592 376-696l104-104v208Zm-80 238v-94l-72-72H200v80h114l86 86Zm-36-130Z"/></svg> */}
+          <div
+            className="meeting-sound-btn meet-heading-btn"
+            onClick={() => setIsSoundOn((prev) => !prev)}
+          >
+            {isSoundOn ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#e3e3e3"
+              >
+                <path d="M560-131v-82q90-26 145-100t55-168q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 127-78 224.5T560-131ZM120-360v-240h160l200-200v640L280-360H120Zm440 40v-322q47 22 73.5 66t26.5 96q0 51-26.5 94.5T560-320ZM400-606l-86 86H200v80h114l86 86v-252ZM300-480Z" />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#e3e3e3"
+              >
+                <path d="M792-56 671-177q-25 16-53 27.5T560-131v-82q14-5 27.5-10t25.5-12L480-368v208L280-360H120v-240h128L56-792l56-56 736 736-56 56Zm-8-232-58-58q17-31 25.5-65t8.5-70q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 53-14.5 102T784-288ZM650-422l-90-90v-130q47 22 73.5 66t26.5 96q0 15-2.5 29.5T650-422ZM480-592 376-696l104-104v208Zm-80 238v-94l-72-72H200v80h114l86 86Zm-36-130Z" />
+              </svg>
+            )}
           </div>
           <div className="meeting-camera-change meet-heading-btn">
             <svg
@@ -634,7 +677,12 @@ const MeetingScreen = ({ meetingCode }) => {
           style={isOnlyDisplayMain ? { height: "100%", margin: "0" } : {}}
         >
           {participantInfo?.map((info, idx) => (
-            <VideoTile idx={idx} stream={info.stream} user={info.user} />
+            <VideoTile
+              idx={idx}
+              isSoundOn={isSoundOn}
+              stream={info.stream}
+              user={info.user}
+            />
           ))}
 
           {participants.length === 0 && participantInfo.length === 0 && (
@@ -865,37 +913,6 @@ const MeetingScreen = ({ meetingCode }) => {
                 <path d="m710-362-58-58q14-23 21-48t7-52h80q0 44-13 83.5T710-362ZM480-594Zm112 112-72-72v-206q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v126l-80-80v-46q0-50 35-85t85-35q50 0 85 35t35 85v240q0 11-2.5 20t-5.5 18ZM440-120v-123q-104-14-172-93t-68-184h80q0 83 57.5 141.5T480-320q34 0 64.5-10.5T600-360l57 57q-29 23-63.5 39T520-243v123h-80Zm352 64L56-792l56-56 736 736-56 56Z" />
               </svg>
             )}
-          </div>
-          <div
-            className={`video-call-reaction1 ${
-              isReactionOpen ? "reaction-tab-open" : ""
-            }`}
-            onClick={() => setIsReactionOpen((prev) => !prev)}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="30px"
-              viewBox="0 -960 960 960"
-              width="30px"
-              fill="#e3e3e3"
-            >
-              <path d="M620-520q25 0 42.5-17.5T680-580q0-25-17.5-42.5T620-640q-25 0-42.5 17.5T560-580q0 25 17.5 42.5T620-520Zm-280 0q25 0 42.5-17.5T400-580q0-25-17.5-42.5T340-640q-25 0-42.5 17.5T280-580q0 25 17.5 42.5T340-520Zm140 260q68 0 123.5-38.5T684-400H276q25 63 80.5 101.5T480-260Zm0 180q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-400Zm0 320q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Z" />
-            </svg>
-          </div>
-          <div
-            className="video-call-more-action1"
-            onClick={() => setIsToolBoxOpen(true)}
-          >
-            {isMessageUnseen && <div className="unseen-message"></div>}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="30px"
-              viewBox="0 -960 960 960"
-              width="30px"
-              fill="#e3e3e3"
-            >
-              <path d="M480-160q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z" />
-            </svg>
           </div>
           <div className="separater">|</div>
           <div className="meet-end-btn" onClick={stopMeeting}>

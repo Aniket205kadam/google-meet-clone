@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import CallService from "../../../services/CallService";
 import { WebSocketContext } from "../../../components/webSocket/WebSocketProvider";
 import { useNavigate } from "react-router-dom";
+import Ringing from "../../../assets/music/ringing.mp3";
 
 const IncomingVideoCall = ({ callInfo }) => {
   const currentUserCameraRef = useRef(null);
@@ -55,7 +56,6 @@ const IncomingVideoCall = ({ callInfo }) => {
     } catch (error) {
       toast.error("Failed to accept the call!");
     } finally {
-      
     }
   };
 
@@ -94,6 +94,7 @@ const IncomingVideoCall = ({ callInfo }) => {
 
   return (
     <div className="incoming-video-call-page">
+      <audio src={Ringing} loop autoPlay />
       <div className="incoming-call-user">
         <img className="incoming-user-profile" src={callInfo.caller.profile} />
         <span className="call-info">Incoming video call</span>

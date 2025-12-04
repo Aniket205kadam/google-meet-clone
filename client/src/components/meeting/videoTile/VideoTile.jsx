@@ -1,10 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import "../../../pages/meeting/meetingScreen/MeetingScreen.css"
 
-const VideoTile = ({ idx, stream, user }) => {
+const VideoTile = ({ idx, stream, user, isSoundOn }) => {
   const videoRef = useRef(null);
-
-  console.log("video link:", stream);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -15,7 +13,7 @@ const VideoTile = ({ idx, stream, user }) => {
   return (
     <div className="participant-video" key={idx}>
       <span className="screen-name">{user.fullName}</span>
-      <video ref={videoRef} autoPlay playsInline />
+      <video ref={videoRef} autoPlay playsInline muted={!isSoundOn} />
     </div>
   );
 };
