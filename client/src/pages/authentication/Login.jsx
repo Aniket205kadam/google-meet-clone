@@ -11,6 +11,7 @@ import { login } from "../../store/authSlice";
 import Spinner from "../../utils/loader/spinner/Spinner";
 
 const Login = () => {
+  const [isMobile, setIsMobile] = useState(true);
   const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState("");
   const [birthDate, setBirthDate] = useState("");
@@ -82,6 +83,12 @@ const Login = () => {
               and memories—without limits! 💖
             </p>
           </div>
+          {!isMobile && (
+            <img
+              src="https://dyte.io/blog/content/images/2023/02/Dyte-Meeting.png"
+              className="demo-image"
+            />
+          )}
           {/*  */}
           {steps[step]}
         </form>

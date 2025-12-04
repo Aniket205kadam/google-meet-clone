@@ -1,0 +1,12 @@
+.loader5 {
+  border-radius: 50%;
+  border: 3px solid rgb(0, 157, 255);
+  border-top-color: transparent;
+  animation: rot1 1.2s linear infinite;
+}
+
+@keyframes rot1 {
+  to {
+    transform: rotate(360deg);
+  }
+}

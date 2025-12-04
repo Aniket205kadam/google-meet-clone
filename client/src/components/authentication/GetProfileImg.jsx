@@ -35,6 +35,7 @@ const GetProfileImg = ({ fullName, birthDate, profile, setProfile }) => {
       if (isSuccess) {
         dispatch(login({ accessToken, isAuthenticated: true }));
         toast.success("Account setup completed successfully!");
+        window.location.reload(); // BUG: After login not refresh websocket
       } else {
         toast.error("Account setup failed. Please try again.");
       }

@@ -59,4 +59,11 @@ public class UserController {
     ) throws OperationNotPermittedException {
         return ResponseEntity.ok(service.fetchUserById(userId, authentication));
     }
+
+    @GetMapping("/email/{user-email}")
+    public ResponseEntity<UserResponse> getUserByEmail(
+            @PathVariable("user-email") String email
+    ) {
+        return ResponseEntity.ok(service.fetchUserByEmail(email));
+    }
 }

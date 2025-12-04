@@ -22,7 +22,6 @@ const StartCall = () => {
   const getSuggestedUser = async () => {
     try {
       const response = await userService.fetchSuggestedUsers(9);
-      console.log(response);
       setSuggestedUsers(response);
     } catch (error) {
       console.error("Failed to fetch suggested user");
@@ -38,7 +37,7 @@ const StartCall = () => {
       {isCreateLinkClick && (
         <CreateLink
           ref={createLinkRef}
-          onClick={() => setIsCreateLinkClick(false)}
+          onClose={() => setIsCreateLinkClick(false)}
         />
       )}
 

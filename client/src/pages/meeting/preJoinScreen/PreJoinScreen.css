@@ -1,0 +1,231 @@
+.pre-meeting-call-page {
+    width: 100vw;
+    height: 100vh;
+    background-color: #434343;
+    display: flex;
+    flex-direction: column;
+}
+
+.pre-meeting-call-heading {
+    width: 100%;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    position: fixed;
+    z-index: 100;
+}
+
+.pre-meeting-call-back-btn {
+    margin-right: 1rem;
+}
+
+.remote-meeting {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.meeting-info {
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    background-color: #151515;
+    height: 50px;
+    padding: 10px;
+    border-radius: 50px;
+    width: 300px;
+}
+
+.link-icon {
+    width: 40px;
+    background-color: rgba(127, 255, 212, 0.418);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50px;
+    margin-right: 20px;
+}
+
+.meeting-code {
+    font-size: 1.2rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.pre-meeting-call-more {
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.pre-meeting-call-main {
+    flex: 1;
+    background-color: #000000;
+    display: flex;
+    justify-content: center;
+}
+
+.current-user-camera-preview {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+}
+
+.current-user-camera-preview video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.current-video-option {
+    position: absolute;
+    display: flex;
+    width: 100%;
+    top: 40%;
+    justify-content: space-evenly;
+}
+
+.cv-option {
+    width: 100px;
+    height: 100px;
+    background-color: #1515157a;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.call-options {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 200px;
+    background-color: #151515ad;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.meeting-join-button {
+    width: 200px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 25px;
+    gap: 10px;
+    border-radius: 50px;
+    background-color: rgba(82, 197, 255, 0.63);
+    border: none;
+    color: #ffffff;
+}
+
+.connected-user {
+    position: absolute;
+    top: -25%;
+    display: flex;
+    color: #ffffff;
+    background-color: rgba(127, 255, 212, 0.418);
+    padding: 5px;
+    border-radius: 50px;
+    justify-content: center;
+    align-items: center;
+}
+
+.connected-user-profile {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    margin-right: 10px;
+}
+
+.connected-user-profile img {
+    border-radius: 50px;
+}
+
+.pre-meeting-loading {
+    width: 100vw;
+    height: 3px;
+    background-color: #ffffff;
+    position: absolute;
+    overflow-x: hidden;
+    z-index: 10000;
+    top: 0;
+}
+
+.loader1 {
+    width: 50%;
+    height: 100%;
+    background-color: #0a86d3;
+    animation: loader3 2s linear alternate infinite;
+}
+
+.before-call-page-loading {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+@keyframes loader3 {
+    0% {
+        /* width: 0%; */
+        margin-left: -40%;
+    }
+
+    10% {
+        margin-left: -30%;
+    }
+
+    20% {
+        margin-left: 20%;
+    }
+
+    30% {
+        margin-left: 30%;
+    }
+
+    40% {
+        margin-left: 40%;
+    }
+
+    50% {
+        margin-left: 50%;
+    }
+
+    60% {
+        margin-left: 60%;
+    }
+
+    70% {
+        margin-left: 70%;
+    }
+
+    80% {
+        margin-left: 80%;
+    }
+
+    90% {
+        margin-left: 90%;
+    }
+
+    100% {
+        margin-left: 100%;
+    }
+
+}

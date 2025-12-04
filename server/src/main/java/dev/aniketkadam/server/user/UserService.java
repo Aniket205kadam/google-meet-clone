@@ -104,4 +104,10 @@ public class UserService {
         }
         return mapper.toUserResponse(fetchedUser);
     }
+
+    public UserResponse fetchUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .map(mapper::toUserResponse)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with Email " + email));
+    }
 }

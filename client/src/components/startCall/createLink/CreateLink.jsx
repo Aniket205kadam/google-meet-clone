@@ -1,10 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./CreateLink.css";
 import CreateLinkLoader from "../../../utils/loader/createLink/CreateLinkLoader";
+import { useSelector } from "react-redux";
+import MeetingService from "../../../services/MeetingService";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
-const CreateLink = ({ ref, onClick }) => {
-  const [link, setLink] = useState("namaskar.com/yig-rjto-wac");
+const CreateLink = ({ ref, onClose }) => {
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const { accessToken } = useSelector((state) => state.authentication);
+  const navigate = useNavigate();
+
+  const meetingService = new MeetingService(accessToken);
+
+  const createMeetingHandler = async () => {
+    setError(false);
+    try {
+      const response = await meetingService.createMeeting();
+      setCode(response);
+      setLoading(false);
+    } catch (error) {
+      setError(true);
+      setLoading(false);
+      console.log("Failed to create meeting:", error);
+    }
+  };
+
+  useEffect(() => {
+    createMeetingHandler();
+  }, []);
 
   return (
     <div className="create-link-continer" ref={ref}>
@@ -19,55 +46,86 @@ const CreateLink = ({ ref, onClick }) => {
             <CreateLinkLoader />
           </div>
         ) : (
-          <div className="display-link">
-            <div className="link-box">
-              <span className="link">{link}</span>
-              <button className="link-copy-btn">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="#2287d4da"
-                >
-                  <path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z" />
-                </svg>
-              </button>
-            </div>
-            <div className="link-options">
-              <button className="link-btn">
-                <div className="share-logo">
+          <>
+            {error ? (
+              <div className="meeting-create-error">
+                <span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    height="24px"
+                    height="40px"
                     viewBox="0 -960 960 960"
-                    width="24px"
-                    fill="#2287d4da"
+                    width="40px"
+                    fill="#f93434"
                   >
-                    <path d="M680-80q-50 0-85-35t-35-85q0-6 3-28L282-392q-16 15-37 23.5t-45 8.5q-50 0-85-35t-35-85q0-50 35-85t85-35q24 0 45 8.5t37 23.5l281-164q-2-7-2.5-13.5T560-760q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35q-24 0-45-8.5T598-672L317-508q2 7 2.5 13.5t.5 14.5q0 8-.5 14.5T317-452l281 164q16-15 37-23.5t45-8.5q50 0 85 35t35 85q0 50-35 85t-85 35Zm0-80q17 0 28.5-11.5T720-200q0-17-11.5-28.5T680-240q-17 0-28.5 11.5T640-200q0 17 11.5 28.5T680-160ZM200-440q17 0 28.5-11.5T240-480q0-17-11.5-28.5T200-520q-17 0-28.5 11.5T160-480q0 17 11.5 28.5T200-440Zm480-280q17 0 28.5-11.5T720-760q0-17-11.5-28.5T680-800q-17 0-28.5 11.5T640-760q0 17 11.5 28.5T680-720Zm0 520ZM200-480Zm480-280Z" />
+                    <path d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
                   </svg>
-                </div>
-                <span>Share</span>
-              </button>
-              <button className="link-btn">
-                <div className="join-logo">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="24px"
-                    viewBox="0 -960 960 960"
-                    width="24px"
-                    fill="#2287d4da"
+                </span>
+                <span>Something is wrong!</span>
+              </div>
+            ) : (
+              <div className="display-link">
+                <div className="link-box">
+                  <span className="link">{code}</span>
+                  <button
+                    className="link-copy-btn"
+                    onClick={() => {
+                      navigator.clipboard
+                        .writeText(code)
+                        .then(() => toast.info("Code copied"));
+                    }}
                   >
-                    <path d="M440-440q17 0 28.5-11.5T480-480q0-17-11.5-28.5T440-520q-17 0-28.5 11.5T400-480q0 17 11.5 28.5T440-440ZM280-120v-80l240-40v-445q0-15-9-27t-23-14l-208-34v-80l220 36q44 8 72 41t28 77v512l-320 54Zm-160 0v-80h80v-560q0-34 23.5-57t56.5-23h400q34 0 57 23t23 57v560h80v80H120Zm160-80h400v-560H280v560Z" />
-                  </svg>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="24px"
+                      viewBox="0 -960 960 960"
+                      width="24px"
+                      fill="#ffffff"
+                    >
+                      <path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z" />
+                    </svg>
+                  </button>
                 </div>
-                <span>Join</span>
-              </button>
-            </div>
-          </div>
+                <div className="link-options">
+                  <button className="link-btn">
+                    <div className="share-logo">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="24px"
+                        viewBox="0 -960 960 960"
+                        width="24px"
+                        fill="#2287d4da"
+                      >
+                        <path d="M680-80q-50 0-85-35t-35-85q0-6 3-28L282-392q-16 15-37 23.5t-45 8.5q-50 0-85-35t-35-85q0-50 35-85t85-35q24 0 45 8.5t37 23.5l281-164q-2-7-2.5-13.5T560-760q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35q-24 0-45-8.5T598-672L317-508q2 7 2.5 13.5t.5 14.5q0 8-.5 14.5T317-452l281 164q16-15 37-23.5t45-8.5q50 0 85 35t35 85q0 50-35 85t-85 35Zm0-80q17 0 28.5-11.5T720-200q0-17-11.5-28.5T680-240q-17 0-28.5 11.5T640-200q0 17 11.5 28.5T680-160ZM200-440q17 0 28.5-11.5T240-480q0-17-11.5-28.5T200-520q-17 0-28.5 11.5T160-480q0 17 11.5 28.5T200-440Zm480-280q17 0 28.5-11.5T720-760q0-17-11.5-28.5T680-800q-17 0-28.5 11.5T640-760q0 17 11.5 28.5T680-720Zm0 520ZM200-480Zm480-280Z" />
+                      </svg>
+                    </div>
+                    <span>Share</span>
+                  </button>
+                  <button
+                    className="link-btn"
+                    onClick={() => navigate(`/${code}`)}
+                  >
+                    <div className="join-logo">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="24px"
+                        viewBox="0 -960 960 960"
+                        width="24px"
+                        fill="#2287d4da"
+                      >
+                        <path d="M440-440q17 0 28.5-11.5T480-480q0-17-11.5-28.5T440-520q-17 0-28.5 11.5T400-480q0 17 11.5 28.5T440-440ZM280-120v-80l240-40v-445q0-15-9-27t-23-14l-208-34v-80l220 36q44 8 72 41t28 77v512l-320 54Zm-160 0v-80h80v-560q0-34 23.5-57t56.5-23h400q34 0 57 23t23 57v560h80v80H120Zm160-80h400v-560H280v560Z" />
+                      </svg>
+                    </div>
+                    <span>Join</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
-        <button className="dismiss-btn" onClick={onClick}>Dismiss</button>
+        <button className="dismiss-btn" onClick={onClose}>
+          Dismiss
+        </button>
       </div>
     </div>
   );

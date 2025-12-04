@@ -47,6 +47,7 @@
 .join-with-code-subtitle {
     width: 100%;
     margin-top: 1rem;
+    color: #abaaaa;
 }
 
 .join-code-input-box {
@@ -65,4 +66,26 @@
     padding: 1rem;
     outline: none;
     border-radius: 50px;
+}
+
+.rejoin-btn {
+    background-color: #000000;
+    border: none;
+    margin-top: 15px;
+    color: #ffffff;
+    width: 14rem;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #ffffff;
+    border-radius: 5px;
+}
+
+.tip-meeting-code {
+    font-size: .7rem;
+    margin-top: 4px;
+    margin-left: 10px;
+    color: #abaaaa;
 }

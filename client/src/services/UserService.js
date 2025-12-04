@@ -49,14 +49,24 @@ class UserService {
   };
 
   fetchSearchedUsers = async (keyword, size) => {
-    const { data } = await this.client.get(`/search?keyword=${keyword}&size=${size}`);
+    const { data } = await this.client.get(
+      `/search?keyword=${keyword}&size=${size}`
+    );
     return data;
   };
 
   fetchUserById = async (userId) => {
     const { data } = await this.client.get(`/u/${userId}`);
     return data;
-  }
+  };
+
+  fetchUserByEmail = async (email) => {
+    const response = await this.client.get(`/email/${email}`);
+    if (response.status !== 200) {
+      throw new Error("Failed to fetch user by email");
+    }
+    return response.data;
+  };
 }
 
 export default UserService;

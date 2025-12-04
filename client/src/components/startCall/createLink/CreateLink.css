@@ -54,8 +54,9 @@
 }
 
 .link {
-    color: #53a6e4da;
+    color: #ffffff;
     font-weight: 700;
+    margin-left: 10px;
 }
 
 .link-copy-btn {
@@ -65,8 +66,7 @@
 }
 
 .link-copy-btn:active {
-    background-color: #e8e0e0;
-    border-radius: 50%;
+    height: 80%;
 }
 
 .link-options {
@@ -87,4 +87,25 @@
     border-radius: 10px;
     color: #ffffff;
     padding: 4px;
+}
+
+.link-btn:active {
+   transform: translate(1px, 2px); 
+   background-color: #e8e0e0;
+   color: #343434;
+}
+
+.meeting-create-error {
+    color: #f93434;
+    font-weight: 600;
+    display: flex;
+    margin-top: 30px;
+    flex-direction: column;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.meeting-create-error svg {
+    font-weight: 600;
 }

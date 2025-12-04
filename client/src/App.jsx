@@ -26,6 +26,9 @@ import UserService from "./services/UserService";
 import WebSocketProvider from "./components/webSocket/WebSocketProvider";
 import IncomingVideoCall from "./pages/incoming/video/IncomingVideoCall";
 import VideoCallScreen from "./pages/videoCallScreen/VideoCallScreen";
+import PreJoinScreen from "./pages/meeting/preJoinScreen/PreJoinScreen";
+import MeetingScreen from "./pages/meeting/meetingScreen/MeetingScreen";
+import Meeting from "./pages/meeting/main/Meeting";
 
 const AppRoutes = () => (
   <Routes>
@@ -66,6 +69,14 @@ const AppRoutes = () => (
       element={
         <ProtectedRoute>
           <JoinWithCode />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/:meetingCode"
+      element={
+        <ProtectedRoute>
+          <Meeting />
         </ProtectedRoute>
       }
     />
@@ -152,7 +163,6 @@ const AppContent = () => {
       const response = await userService.fetchUserByToken();
       setConnectedUser(response);
     } catch (error) {
-      toast.error("Failed to fetch connected user");
       console.error("Failed to fetch connected user: ", error);
     }
   };
@@ -164,35 +174,6 @@ const AppContent = () => {
       return;
     }
     setTimeout(() => loadNewAccessToken(), 5000);
-  };
-
-  const connectWebSocket = () => {
-    if (!accessToken || !connectedUser?.email) {
-      console.warn("Missing token or user — skipping WebSocket connection.");
-      return;
-    }
-
-    const socket = new SockJS("http://localhost:8080/signal");
-    stompClient.current = Stomp.over(socket);
-    stompClient.current.debug = null;
-
-    stompClient.current.connect(
-      { Authorization: `Bearer ${accessToken}` },
-      (frame) => {
-        console.log("WebSocket connected:", frame);
-
-        stompClient.current.subscribe(
-          `/topic/incoming/call/${connectedUser.email}`,
-          (message) => {
-            const data = JSON.parse(message.body);
-            console.log("Incoming signal:", data);
-          }
-        );
-      },
-      (error) => {
-        console.error("WebSocket connection failed:", error);
-      }
-    );
   };
 
   useEffect(() => {
@@ -227,14 +208,13 @@ const App = () => {
     email: "",
     profile: "",
   });
-  const userService = new UserService(accessToken);
 
   const getUserByToken = async () => {
     try {
+      const userService = new UserService(accessToken)
       const response = await userService.fetchUserByToken();
       setConnectedUser(response);
     } catch (error) {
-      toast.error("Failed to fetch connected user");
       console.error("Failed to fetch connected user: ", error);
     }
   };

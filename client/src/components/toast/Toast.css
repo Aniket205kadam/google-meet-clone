@@ -1,0 +1,80 @@
+.toast {
+    visibility: hidden;
+    max-width: 50px;
+    height: 50px;
+    margin: auto;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+    background-color: #02a6cf;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    right: 0;
+    bottom: 30px;
+    font-size: 17px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    border-radius: 50px;
+}
+
+.toast .img {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e2f2a7;
+    border-radius: 50px;
+}
+
+.img1 {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.toast .desc {
+    color: #fff;
+    padding: 0 0;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-left: 10px;
+}
+
+.toast.show {
+    visibility: visible;
+    animation:
+        fadein 0.5s,
+        expand 0.5s 0.5s,
+        stay 3s 1s,
+        shrink 0.5s 4s,
+        fadeout 0.5s 4.5s;
+}
+
+@keyframes fadein {
+    from { bottom: 0; opacity: 0; }
+    to   { bottom: 30px; opacity: 1; }
+}
+
+@keyframes expand {
+    from { min-width: 50px; }
+    to   { min-width: 350px; }
+}
+
+@keyframes stay {
+    from { min-width: 350px; }
+    to   { min-width: 350px; }
+}
+
+@keyframes shrink {
+    from { min-width: 350px; }
+    to   { min-width: 50px; }
+}
+
+@keyframes fadeout {
+    from { bottom: 30px; opacity: 1; }
+    to   { bottom: 60px; opacity: 0; }
+}

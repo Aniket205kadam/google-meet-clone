@@ -2,10 +2,11 @@ import { createContext, useEffect, useRef, useState } from "react";
 import SockJS from "sockjs-client/dist/sockjs.js";
 import Stomp from "stompjs";
 import IncomingVideoCall from "../../pages/incoming/video/IncomingVideoCall";
+import { useSelector } from "react-redux";
 
 export const WebSocketContext = createContext(null);
 
-const WebSocketProvider = ({ accessToken, connectedUser, children }) => {
+const WebSocketProvider = ({ connectedUser, children }) => {
   const stompClient = useRef(null);
   const [incomingCall, setIncomingCall] = useState({
     status: false,
@@ -13,9 +14,10 @@ const WebSocketProvider = ({ accessToken, connectedUser, children }) => {
   });
   const [callStatus, setCallStatus] = useState("calling");
   const [isStompConnected, setIsStompConnected] = useState(false);
+  const { accessToken } = useSelector((state) => state.authentication);
 
   const connectWebSocket = () => {
-    if (!accessToken || !connectedUser?.email) {
+    if (!accessToken || connectedUser.email.length === 0) {
       return;
     }
 
@@ -63,7 +65,7 @@ const WebSocketProvider = ({ accessToken, connectedUser, children }) => {
   };
 
   useEffect(() => {
-    if (accessToken && connectedUser?.email.length > 0) {
+    if (accessToken) {
       connectWebSocket();
     }
 
@@ -74,7 +76,7 @@ const WebSocketProvider = ({ accessToken, connectedUser, children }) => {
         );
       }
     };
-  }, [accessToken, connectedUser]);
+  }, [accessToken, connectedUser.email]);
 
   return (
     <WebSocketContext.Provider
@@ -82,13 +84,11 @@ const WebSocketProvider = ({ accessToken, connectedUser, children }) => {
         stompClient,
         callStatus,
         setIncomingCall,
-        isStompConnected
+        isStompConnected,
       }}
     >
       {incomingCall.status && (
-        <IncomingVideoCall
-          callInfo={incomingCall.data}
-        />
+        <IncomingVideoCall callInfo={incomingCall.data} />
       )}
       {children}
     </WebSocketContext.Provider>
