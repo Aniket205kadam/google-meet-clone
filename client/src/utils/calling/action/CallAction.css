@@ -8,6 +8,10 @@
     align-items: center;
 }
 
+.call-actions1 svg {
+    fill: #ffffff;
+}
+
 .call-options1 {
     background-color: #383838;
     height: 100%;
@@ -44,4 +48,26 @@
 
 .off svg {
     fill: #d43a3a;
+}
+
+@media (min-width: 500px) {
+    .call-actions1 {
+        height: 50px;
+    }
+
+    .call-options1 {
+        background-color: inherit;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .call-option1 {
+        width: 80px;
+        cursor: pointer;
+    }
+
+    .call-option1 svg {
+        width: 24px;
+        height: 24px;
+    }
 }

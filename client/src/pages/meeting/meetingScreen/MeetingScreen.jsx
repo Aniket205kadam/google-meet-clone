@@ -1,25 +1,23 @@
-import React from "react";
 import { useContext, useState, useRef, useEffect } from "react";
 import { WebSocketContext } from "../../../components/webSocket/WebSocketProvider";
-import { data, useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useClickOutside from "../../../hooks/useClickOutside";
 import "./MeetingScreen.css";
-import { toast } from "react-toastify";
 import MediaDeviceService from "../../../services/MediaDeviceService";
 import { useSelector } from "react-redux";
 import UserAdd from "../../../assets/music/user-add.m4a";
 import AddUser from "../../../components/meeting/addUser/AddUser";
 import MeetingService from "../../../services/MeetingService";
-import Loader2 from "../../../utils/loader/loading/Loader2";
 import UserService from "../../../services/UserService";
 import WebRtcConfig from "../../../config/WebRtcConfig";
 import VideoTile from "../../../components/meeting/videoTile/VideoTile";
 import Toast from "../../../components/toast/Toast";
+import { toast } from "react-toastify";
+import { useWindowWidth } from "../../../hooks/useWindowWidth";
 
 const MeetingScreen = ({ meetingCode }) => {
   const { stompClient, isStompConnected } = useContext(WebSocketContext);
   const { accessToken } = useSelector((state) => state.authentication);
-
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [isHandRaised, setIsHandRaised] = useState(false);
@@ -43,12 +41,21 @@ const MeetingScreen = ({ meetingCode }) => {
   const [isShowParticipantsInfo, setIsShowParticipantsInfo] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isUserAdmin, setIsUserAdmin] = useState(false);
-
   const currentUserVideoOptionRef = useRef();
   const currentVideoRef = useRef(null);
   const currentVideoStreamRef = useRef(null);
-
   const navigate = useNavigate();
+
+  const participantsRtcConnectionObjects = new Map();
+  const [participantInfo, setParticipantInfo] = useState([]); // {stream: {...}, user: {...}}
+  const participantsIce = new Map();
+  const [isShowToast, setIsShowToast] = useState({
+    isShow: false,
+    image: "",
+    description: "",
+  });
+
+  const screenWidth = useWindowWidth();
 
   const mediaDeviceService = new MediaDeviceService(accessToken);
   const meetingService = new MeetingService(accessToken);
@@ -90,8 +97,8 @@ const MeetingScreen = ({ meetingCode }) => {
     try {
       await meetingService.addInMeeting(meetingCode);
     } catch (error) {
-      // toast.error("Failed to join the meeting!");
-      // navigate("/");
+      toast.error("Failed to join the meeting!");
+      navigate("/");
     }
   };
 
@@ -133,50 +140,6 @@ const MeetingScreen = ({ meetingCode }) => {
     }
   };
 
-  useEffect(() => {
-    getCameraStream();
-
-    return () => {
-      mediaDeviceService.stopCameraStream(
-        currentVideoStreamRef,
-        currentVideoRef
-      );
-    };
-  }, []);
-
-  useEffect(() => {
-    fetchCurrentUser();
-    fetchMeetingParticipants();
-    addInMeeting();
-    currentUserIsAdmin();
-    fetchWaitingUsers();
-  }, []);
-
-  useEffect(() => {
-    if (isStompConnected && currentUser) {
-      listeningUserAddInMeeting();
-      listeningUserRemoveFromMeeting();
-    }
-  }, [stompClient, currentUser]);
-
-  useEffect(() => {
-    if (currentUser && isStompConnected) {
-      listeningWaitingUsers();
-    }
-  }, [currentUser, isStompConnected]);
-
-  // webrtc logic
-  const participantsRtcConnectionObjects = new Map();
-  const [participantStreams, setParticipantStreams] = useState([]);
-  const [participantInfo, setParticipantInfo] = useState([]); // {stream: {...}, user: {...}}
-  const participantsVideoRef = new Map();
-  const participantsIce = new Map();
-  const [isShowToast, setIsShowToast] = useState({
-    isShow: false,
-    image: "",
-    description: "",
-  });
-
   const createPeerConnection = async (targetUser) => {
     const peerConnection = new RTCPeerConnection(WebRtcConfig);
 
@@ -185,14 +148,6 @@ const MeetingScreen = ({ meetingCode }) => {
         peerConnection.addTrack(track, currentVideoStreamRef.current);
       });
     }
-
-    // peerConnection.ontrack = (event) => {
-    //   const stream = event.streams[0];
-    //   setParticipantInfo((prev) => [
-    //     ...prev,
-    //     { stream: stream, user: targetUser },
-    //   ]);
-    // };
 
     peerConnection.ontrack = (event) => {
       const stream = event.streams[0];
@@ -478,6 +433,38 @@ const MeetingScreen = ({ meetingCode }) => {
       }
     } catch (error) {}
   };
+
+  useEffect(() => {
+    getCameraStream();
+
+    return () => {
+      mediaDeviceService.stopCameraStream(
+        currentVideoStreamRef,
+        currentVideoRef
+      );
+    };
+  }, []);
+
+  useEffect(() => {
+    fetchCurrentUser();
+    fetchMeetingParticipants();
+    addInMeeting();
+    currentUserIsAdmin();
+    fetchWaitingUsers();
+  }, []);
+
+  useEffect(() => {
+    if (isStompConnected && currentUser) {
+      listeningUserAddInMeeting();
+      listeningUserRemoveFromMeeting();
+    }
+  }, [stompClient, currentUser]);
+
+  useEffect(() => {
+    if (currentUser && isStompConnected) {
+      listeningWaitingUsers();
+    }
+  }, [currentUser, isStompConnected]);
 
   useEffect(() => {
     toggleTracks("video", isCameraOn);
@@ -914,7 +901,25 @@ const MeetingScreen = ({ meetingCode }) => {
               </svg>
             )}
           </div>
-          <div className="separater">|</div>
+          <div
+            className="video-call-action1 meeting-info"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsShowParticipantsInfo(true);
+            }}
+          >
+            <div className="participant-count">{participantInfo?.length + 1}</div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="30px"
+              viewBox="0 -960 960 960"
+              width="30px"
+              fill="#e3e3e3"
+            >
+              <path d="M0-240v-63q0-43 44-70t116-27q13 0 25 .5t23 2.5q-14 21-21 44t-7 48v65H0Zm240 0v-65q0-32 17.5-58.5T307-410q32-20 76.5-30t96.5-10q53 0 97.5 10t76.5 30q32 20 49 46.5t17 58.5v65H240Zm540 0v-65q0-26-6.5-49T754-397q11-2 22.5-2.5t23.5-.5q72 0 116 26.5t44 70.5v63H780Zm-455-80h311q-10-20-55.5-35T480-370q-55 0-100.5 15T325-320ZM160-440q-33 0-56.5-23.5T80-520q0-34 23.5-57t56.5-23q34 0 57 23t23 57q0 33-23 56.5T160-440Zm640 0q-33 0-56.5-23.5T720-520q0-34 23.5-57t56.5-23q34 0 57 23t23 57q0 33-23 56.5T800-440Zm-320-40q-50 0-85-35t-35-85q0-51 35-85.5t85-34.5q51 0 85.5 34.5T600-600q0 50-34.5 85T480-480Zm0-80q17 0 28.5-11.5T520-600q0-17-11.5-28.5T480-640q-17 0-28.5 11.5T440-600q0 17 11.5 28.5T480-560Zm1 240Zm-1-280Z" />
+            </svg>
+          </div>
+          {screenWidth <= 500 && <div className="separater">|</div>}
           <div className="meet-end-btn" onClick={stopMeeting}>
             <svg
               xmlns="http://www.w3.org/2000/svg"

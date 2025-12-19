@@ -133,3 +133,27 @@
         opacity: 1;
     }
 }
+
+.tool-box-desktop-container {
+    background-color: #282828;
+    position: absolute;
+    z-index: 10000000000;
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 20px;
+    bottom: 16%;
+    right: 20%;
+}
+
+.tool-box-option {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    gap: 20px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.tool-box-option:hover {
+    background-color: #3e3e3e;
+}

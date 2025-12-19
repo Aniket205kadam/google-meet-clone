@@ -5,6 +5,7 @@ import MeetingService from "../../../services/MeetingService";
 import UserService from "../../../services/UserService";
 import Loader2 from "../../../utils/loader/loading/Loader2";
 import { toast } from "react-toastify";
+import { useWindowWidth } from "../../../hooks/useWindowWidth";
 
 const AddUser = ({ meetingCode, setIsShowParticipantsInfo }) => {
   const [currentUser, setCurrentUser] = useState();
@@ -15,6 +16,8 @@ const AddUser = ({ meetingCode, setIsShowParticipantsInfo }) => {
   const { accessToken } = useSelector((state) => state.authentication);
   const meetingService = new MeetingService(accessToken);
   const userService = new UserService(accessToken);
+
+  const screenWidth = useWindowWidth();
 
   const fetchWaitingUsers = async () => {
     try {
@@ -91,15 +94,27 @@ const AddUser = ({ meetingCode, setIsShowParticipantsInfo }) => {
           className="add-user-heading-back"
           onClick={() => setIsShowParticipantsInfo(false)}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="30px"
-            viewBox="0 -960 960 960"
-            width="30px"
-            fill="#e3e3e3"
-          >
-            <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
-          </svg>
+          {screenWidth > 500 ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#e3e3e3"
+            >
+              <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="30px"
+              viewBox="0 -960 960 960"
+              width="30px"
+              fill="#e3e3e3"
+            >
+              <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+            </svg>
+          )}
         </div>
         <span className="meeting-code1">{meetingCode}</span>
       </div>

@@ -1,0 +1,48 @@
+.search-user-load2 {
+    color: #ffffff;
+    display: flex;
+    margin-bottom: 3px;
+    align-items: center;
+}
+
+.search-profile-load2 {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    margin-right: 1.2rem;
+    margin-left: 0.8rem;
+}
+
+.user-info-load2 {
+    flex: 1;
+}
+
+.name-load2 {
+    width: 60%;
+    height: 15px;
+    margin-bottom: 5px;
+}
+
+.subtitle-load2 {
+    width: 80%;
+    height: 10px;
+}
+
+.search-profile-load2,
+.name-load2,
+.subtitle-load2 {
+    background: linear-gradient(90deg, #6b6b6c 25%, #8b8b8b 50%, #6b6b6c 75%);
+    background-size: 200% 100%;
+    animation: loading 1.6s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+
+}

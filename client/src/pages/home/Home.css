@@ -9,6 +9,10 @@
     /* make change here */
 }
 
+.home-page svg {
+    fill: #ffffff;
+}
+
 .search-container {
     display: flex;
     justify-content: space-between;
@@ -161,6 +165,10 @@
     padding: 10px;
 }
 
+.show-more-call-history svg {
+    fill: #000000;
+}
+
 .show-more-call-history:hover {
     background-color: #f5f5f5;
 } 
@@ -173,4 +181,8 @@
     to {
         background-color: rgba(0, 0, 0, 0.7);
     }
+}
+
+@media (min-width: 500px) {
+    
 }

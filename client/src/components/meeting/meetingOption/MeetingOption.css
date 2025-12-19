@@ -1,0 +1,32 @@
+.meeting-option-container {
+    background-color: #e5e9ef;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: start;
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.30);
+    padding: 10px;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-size: .9rem;
+    font-weight: 500;
+}
+
+.meeting-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    width: 100%;
+    padding: 10px;
+    border-radius: 20px;
+}
+
+.meeting-option:hover {
+    background-color: #00000025;
+}
+
+.meeting-option svg {
+    fill: #000000;
+}

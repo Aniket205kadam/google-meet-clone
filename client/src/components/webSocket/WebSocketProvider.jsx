@@ -14,7 +14,7 @@ const WebSocketProvider = ({ connectedUser, children }) => {
   });
   const [callStatus, setCallStatus] = useState("calling");
   const [isStompConnected, setIsStompConnected] = useState(false);
-  const { accessToken } = useSelector((state) => state.authentication);
+  const { accessToken, isAuthenticated } = useSelector((state) => state.authentication);
 
   const connectWebSocket = () => {
     if (!accessToken || connectedUser.email.length === 0) {
@@ -76,7 +76,7 @@ const WebSocketProvider = ({ connectedUser, children }) => {
         );
       }
     };
-  }, [accessToken, connectedUser.email]);
+  }, [isAuthenticated, connectedUser.email]);
 
   return (
     <WebSocketContext.Provider

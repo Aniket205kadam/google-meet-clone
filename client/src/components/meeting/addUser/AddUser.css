@@ -17,6 +17,10 @@
 .add-user-heading-back {
     margin-right: 20px;
     margin-left: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
 }
 
 .meeting-code1 {
@@ -218,4 +222,20 @@
 
 .waiting-user-name {
     font-weight: 600;
+}
+
+.navigation-option {
+    cursor: pointer;
+}
+
+@media (min-width: 500px) {
+    .meeting-add-user-container1 {
+        width: 400px;
+        box-shadow: 0 8px 24px rgba(255, 255, 255, 0.08);
+    }
+
+    .add-user-heading {
+        flex-direction: row-reverse;
+        gap: 20%;
+    }
 }

@@ -12,7 +12,7 @@ import {
   startServer,
 } from "./services/AuthenticationService";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "./store/authSlice";
+import { login, updateRefreshToken } from "./store/authSlice";
 import { toast } from "react-toastify";
 import { useEffect, useState, useRef } from "react";
 import "./App.css";
@@ -89,14 +89,6 @@ const AppRoutes = () => (
       }
     />
     <Route
-      path="/demo"
-      element={
-        <ProtectedRoute>
-          <IncomingVideoCall />
-        </ProtectedRoute>
-      }
-    />
-    <Route
       path="/video-calling/:targetUserId/video/:isVideoOn/audio/:isAudioOn"
       element={
         <ProtectedRoute>
@@ -136,9 +128,13 @@ const AppContent = () => {
     profile: "",
   });
 
-  const { accessToken } = useSelector((state) => state.authentication);
+  const { accessToken, isAuthenticated } = useSelector(
+    (state) => state.authentication
+  );
 
   const userService = new UserService(accessToken);
+
+  const timeoutId = useRef(null);
 
   const loadNewAccessToken = async () => {
     try {
@@ -148,7 +144,19 @@ const AppContent = () => {
         navigate("/login");
         return;
       }
-      dispatch(login({ accessToken: response, isAuthenticated: true }));
+      if (isAuthenticated) {
+        console.log("Run this method:", isAuthenticated);
+        updateRefreshToken({ accessToken: response });
+      } else {
+        dispatch(login({ accessToken: response, isAuthenticated: true }));
+      }
+
+      if (timeoutId.current) {
+        clearTimeout(timeoutId.current);
+      }
+      timeoutId.current = setTimeout(() => {
+        loadNewAccessToken();
+      }, 360000); //360000
     } catch (error) {
       console.error("Token refresh failed:", error);
       toast.error("Authentication failed. Please log in again.");
@@ -211,7 +219,7 @@ const App = () => {
 
   const getUserByToken = async () => {
     try {
-      const userService = new UserService(accessToken)
+      const userService = new UserService(accessToken);
       const response = await userService.fetchUserByToken();
       setConnectedUser(response);
     } catch (error) {

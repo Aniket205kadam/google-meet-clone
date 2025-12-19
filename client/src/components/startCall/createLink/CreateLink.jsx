@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import MeetingService from "../../../services/MeetingService";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useWindowWidth } from "../../../hooks/useWindowWidth";
 
 const CreateLink = ({ ref, onClose }) => {
   const [code, setCode] = useState("");
@@ -13,6 +14,8 @@ const CreateLink = ({ ref, onClose }) => {
 
   const { accessToken } = useSelector((state) => state.authentication);
   const navigate = useNavigate();
+
+  const screenWidth = useWindowWidth();
 
   const meetingService = new MeetingService(accessToken);
 
@@ -32,6 +35,59 @@ const CreateLink = ({ ref, onClose }) => {
   useEffect(() => {
     createMeetingHandler();
   }, []);
+
+  if (screenWidth > 500) {
+    return (
+      <div className="create-meeting-code-container" ref={ref}>
+        <div className="create-meeting-code-header">
+          <h3>Here's your joining info</h3>
+          <svg
+            onClick={onClose}
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="#e3e3e3"
+          >
+            <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+          </svg>
+        </div>
+        {loading ? (
+          <div className="create-meeting-code-loading1">
+            <CreateLinkLoader />
+          </div>
+        ) : (
+          <div className="create-meeting-code-main">
+            <p>
+              Send this to people you want to meet with. Be sure to save it so
+              you can use it later, too.
+            </p>
+            <div className="meeting-code2">
+              <div className="meeting-generated-code">{`http://localhost:5173/${code}`}</div>
+              <button
+                className="copy-btn1"
+                onClick={() => {
+                  navigator.clipboard
+                    .writeText(`http://localhost:5173/${code}`)
+                    .then(() => console.log("Code copied"));
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 -960 960 960"
+                  width="24px"
+                  fill="#e3e3e3"
+                >
+                  <path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="create-link-continer" ref={ref}>

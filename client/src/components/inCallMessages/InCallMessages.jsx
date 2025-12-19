@@ -205,6 +205,11 @@ const InCallMessages = ({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           ref={messageInputRef}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && content.trim().length > 0) {
+              sendMessageToTargetUser();
+            }
+          }}
         />
         <button className="message-send-btn" onClick={sendMessageToTargetUser}>
           <svg

@@ -121,7 +121,7 @@
 }
 
 .you,
-.friend  {
+.friend {
     border-right: 2px solid #ffffff;
     border-bottom: 2px solid #ffffff;
 }
@@ -131,4 +131,30 @@
     width: 80px;
     height: 80px;
     object-fit: cover;
+}
+
+@media (min-width: 500px) {
+    .in-call-messages-container {
+        width: 30%;
+        height: 100%;
+        left: 0;
+        z-index: 9999999999;
+    }
+
+    .callers {
+        display: none;
+    }
+
+    .in-call-messages-heading {
+        flex-direction: row-reverse;
+        gap: 15%;
+    }
+
+    .in-call-messages-heading svg {
+        cursor: pointer;
+    }
+
+    .in-call-messages-heading svg:hover {
+        background-color: #3e3d3d;
+    }
 }

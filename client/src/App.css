@@ -21,6 +21,12 @@
     animation-timing-function: ease-in-out;
 }
 
+@media (max-width: 500px) {
+    svg {
+        fill: #ffffff;
+    }
+}
+
 @keyframes barLoading { 
     0% {
         width: 0%;

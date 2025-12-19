@@ -1,56 +1,128 @@
 .call-history-item {
     width: 98%;
     padding: 1rem;
-    background-color: #52bbef54;
+    background-color: #444548;
     display: flex;
+    align-items: center;
     border-radius: 20px;
     margin-bottom: 1rem;
+    box-sizing: border-box;
+
+    /* #ebf2ff */
+}
+
+.call-history-item svg {
+    fill: #ffffff;
 }
 
 .call-history-info {
-    width: 90%;
+    flex: 1;
     display: flex;
+    align-items: center;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.call-missed-svg {
+    fill: #b3261e;
 }
 
 .call-history-profile {
-    width: 20%;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 50%;
+    overflow: hidden;
     display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .call-history-profile img {
     width: 100%;
-    border-radius: 50px;
+    height: 100%;
+    border-radius: 50%;
     object-fit: cover;
 }
 
 .call-history-target-info {
-    width: 80%;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    margin-left: 10px;
+    margin-left: 12px;
+    min-width: 0;
 }
 
 .call-history-email {
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
 .call-meta-data {
     display: flex;
     flex-direction: row;
-    font-size: .8rem;
+    font-size: 0.8rem;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.call-meta-data>* {
+    display: flex;
+    align-items: center;
 }
 
 .call-status div {
     display: flex;
     align-items: center;
+    gap: 4px;
 }
 
 .history-more-option {
-    width: 10%;
+    width: 40px;
+    min-width: 40px;
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
+}
 
+@media (min-width: 400px) {
+    .call-history-item {
+        width: 100%;
+    }
+
+    .call-history-email {
+        font-size: 1rem;
+    }
+}
+
+.call-history-item:hover {
+    background-color: #e4e8f0;
+}
+
+.history-more-option:hover {
+    background-color: rgb(192, 201, 201);
+    fill: #ffffff;
+    border-radius: 50%;
+    height: 40px;
+    width: 40px;
+    transition: fill 0.2s ease;
+}
+
+@media (min-width: 500px) {
+    .call-history-item {
+        background-color: #ebf2ff;
+    }
+
+    .call-history-item svg {
+        fill: #444548;
+    }
+
+    .call-missed-svg {
+        fill: #b3261e;
+    }
 }

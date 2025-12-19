@@ -1,0 +1,26 @@
+/* Outer rounded pill like Google Meet */
+.gm-mic-container {
+  width: 48px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+
+  padding: 4px 6px;
+  backdrop-filter: blur(4px);
+}
+
+/* The 3 animated bars */
+.gm-bar {
+  width: 6px;
+  height: 70%;
+  border-radius: 3px;
+
+  background: linear-gradient(to top, #1a73e8 0%, #4dabf7 100%);
+  transform-origin: bottom center;
+  transition: transform 120ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}

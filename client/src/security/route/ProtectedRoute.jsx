@@ -1,10 +1,9 @@
-import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = useSelector(
-    (state) => state.authentication.isAuthenticated
+  const { isAuthenticated } = useSelector(
+    (state) => state.authentication
   );
 
   if (!isAuthenticated) {
