@@ -48,6 +48,8 @@ application:
       access-token-expiration: 900000 # Access token expires in 15 minutes
       refresh-token-expiration: 604800000 # Refresh token expires in 7 days
       secret-key: ${SERVER_SECRET}
+    access-origins:
+      frontend: ${FRONTEND_URL}
   mail:
     from: ${MAIL_FROM}
     reply-to: ${MAIL_REPLY_TO}

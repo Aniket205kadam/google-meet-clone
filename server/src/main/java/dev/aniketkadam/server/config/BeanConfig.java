@@ -18,6 +18,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,8 @@ public class BeanConfig {
     private String cloudinaryApiKey;
     @Value("${application.cloudinary.api-secret}")
     private String cloudinaryApiSecret;
+    @Value("${application.security.access-origins.frontend}")
+    private String frontendUrl;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -60,7 +63,7 @@ public class BeanConfig {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedOrigins(Collections.singletonList(frontendUrl));
         configuration.setExposedHeaders(List.of("Set-Cookie"));
         configuration.setAllowedHeaders(Arrays.asList(
                 ORIGIN,
