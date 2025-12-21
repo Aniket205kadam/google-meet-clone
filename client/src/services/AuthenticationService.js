@@ -1,6 +1,7 @@
 import axios from "axios";
+import AppConfig from "../config/AppConfig";
 
-const API_URL = "http://localhost:8080/api/v1/authentication";
+const API_URL = `${AppConfig.backendUrl}/api/v1/authentication`;
 
 export const loginWithOAuth = async (googleToken) => {
   const response = await axios.post(

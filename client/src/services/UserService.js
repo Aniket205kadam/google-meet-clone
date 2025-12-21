@@ -1,8 +1,7 @@
 import axios from "axios";
 import AppConfig from "../config/AppConfig";
 
-// const backendUrl = `${AppConfig.backendUrl}/api/v1/users`;
-const backendUrl = "http://localhost:8080/api/v1/users";
+const backendUrl = `${AppConfig.backendUrl}/api/v1/users`;
 
 class UserService {
   constructor(accessToken) {

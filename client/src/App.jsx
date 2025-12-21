@@ -29,6 +29,7 @@ import VideoCallScreen from "./pages/videoCallScreen/VideoCallScreen";
 import PreJoinScreen from "./pages/meeting/preJoinScreen/PreJoinScreen";
 import MeetingScreen from "./pages/meeting/meetingScreen/MeetingScreen";
 import Meeting from "./pages/meeting/main/Meeting";
+import AppConfig from "./config/AppConfig";
 
 const AppRoutes = () => (
   <Routes>
@@ -135,6 +136,8 @@ const AppContent = () => {
   const userService = new UserService(accessToken);
 
   const timeoutId = useRef(null);
+
+  console.log(AppConfig.backendUrl)
 
   const loadNewAccessToken = async () => {
     try {
