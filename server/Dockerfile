@@ -12,7 +12,7 @@ FROM eclipse-temurin:21
 
 WORKDIR /app
 
-COPY --from=build /app/target/namaskar.jar .
+COPY --from=build /app/target/namaskar-backend.jar .
 
 EXPOSE 8080
 
