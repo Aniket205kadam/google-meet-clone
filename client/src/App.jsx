@@ -136,9 +136,7 @@ const AppContent = () => {
   const userService = new UserService(accessToken);
 
   const timeoutId = useRef(null);
-
-  console.log(AppConfig.backendUrl)
-
+  
   const loadNewAccessToken = async () => {
     try {
       setLoading(true);

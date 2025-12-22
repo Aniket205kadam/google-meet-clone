@@ -161,6 +161,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 
 .continue-btn:hover {
@@ -183,6 +184,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 
 .save-btn:hover {
@@ -206,6 +208,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 
 .skip-btn:hover {
@@ -239,6 +242,7 @@
 .profile-input {
     margin-top: 1rem;
     position: relative;
+    cursor: pointer;
 }
 
 .profile-input img {
@@ -275,11 +279,6 @@
     border-radius: 10px;
     display: flex;
     z-index: 100;
-}
-
-.demo-image {
-    width: 100%;
-    height: 100%;
 }
 
 @keyframes scroll-left {
@@ -341,13 +340,19 @@
         border-top-right-radius: 0px;
     }
 
-    .get-personal-info {
-        /* height: 100%; */
-    }
-
     .images-background-container {
         width: 50vw;
     }
 
+    .get-personal-info {
+        width: 50%;
+    }
 
+    .get-profile {
+        width: 50%;
+    }
+
+    .skip-btn, .save-btn {
+        width: 50%;
+    }
 }
