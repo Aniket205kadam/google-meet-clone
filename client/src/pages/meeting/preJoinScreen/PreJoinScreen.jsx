@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import "./PreJoinScreen.css";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import MediaDeviceService from "../../../services/MediaDeviceService";
 import { useSelector } from "react-redux";
 import UserService from "../../../services/UserService";
@@ -8,11 +8,11 @@ import MeetingService from "../../../services/MeetingService";
 import { toast } from "react-toastify";
 import { WebSocketContext } from "../../../components/webSocket/WebSocketProvider";
 import { useWindowWidth } from "../../../hooks/useWindowWidth";
-import Logo from "../../../assets/logo/Logo.png";
+import Logo from "../../../assets/logo/logo.png";
 import MicAnimation from "../../../utils/mic/MicAnimation";
 
 const PreJoinScreen = ({ meetingCode, setIsUserReadyToJoin }) => {
-  const { stompClient, isStompConnected } = useContext(WebSocketContext);
+  const { stompClient } = useContext(WebSocketContext);
 
   const [connectedUser, setConnectedUser] = useState(null);
   const [isCameraOn, setIsCameraOn] = useState(true);
