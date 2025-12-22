@@ -193,12 +193,6 @@ const AppContent = () => {
   }, []);
 
   useEffect(() => {
-    if (screenWidth <= 500) {
-      setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 300);
-    }
-  }, []);
-
-  useEffect(() => {
     if (!loading && accessToken) {
       getUserByToken();
     }
