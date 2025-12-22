@@ -6,6 +6,7 @@ import MeetingService from "../../../services/MeetingService";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useWindowWidth } from "../../../hooks/useWindowWidth";
+import AppConfig from "../../../config/AppConfig";
 
 const CreateLink = ({ ref, onClose }) => {
   const [code, setCode] = useState("");
@@ -63,12 +64,12 @@ const CreateLink = ({ ref, onClose }) => {
               you can use it later, too.
             </p>
             <div className="meeting-code2">
-              <div className="meeting-generated-code">{`http://localhost:5173/${code}`}</div>
+              <div className="meeting-generated-code">{`${AppConfig.appRoot}/${code}`}</div>
               <button
                 className="copy-btn1"
                 onClick={() => {
                   navigator.clipboard
-                    .writeText(`http://localhost:5173/${code}`)
+                    .writeText(`${AppConfig.appRoot}/${code}`)
                     .then(() => console.log("Code copied"));
                 }}
               >

@@ -3,6 +3,7 @@ import SockJS from "sockjs-client/dist/sockjs.js";
 import Stomp from "stompjs";
 import IncomingVideoCall from "../../pages/incoming/video/IncomingVideoCall";
 import { useSelector } from "react-redux";
+import AppConfig from "../../config/AppConfig";
 
 export const WebSocketContext = createContext(null);
 
@@ -21,7 +22,7 @@ const WebSocketProvider = ({ connectedUser, children }) => {
       return;
     }
 
-    const socket = new SockJS("http://localhost:8080/signal");
+    const socket = new SockJS(`${AppConfig.backendUrl}/signal`);
     stompClient.current = Stomp.over(socket);
     stompClient.current.debug = null;
 

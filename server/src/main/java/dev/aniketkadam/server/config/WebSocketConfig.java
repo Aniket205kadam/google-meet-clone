@@ -2,6 +2,7 @@ package dev.aniketkadam.server.config;
 
 import dev.aniketkadam.server.webSocket.WebSocketAuthenticationInterceptor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -16,10 +17,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final WebSocketAuthenticationInterceptor webSocketAuthenticationInterceptor;
 
+    @Value("${application.security.access-origins.frontend}")
+    private String frontendUrl;
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/signal")
-                .setAllowedOrigins("http://localhost:5173")
+                .setAllowedOrigins(frontendUrl)
                 .withSockJS();
     }
 

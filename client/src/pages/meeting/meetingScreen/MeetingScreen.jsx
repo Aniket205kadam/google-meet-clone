@@ -14,6 +14,7 @@ import VideoTile from "../../../components/meeting/videoTile/VideoTile";
 import Toast from "../../../components/toast/Toast";
 import { toast } from "react-toastify";
 import { useWindowWidth } from "../../../hooks/useWindowWidth";
+import AppConfig from "../../../config/AppConfig";
 
 const MeetingScreen = ({ meetingCode }) => {
   const { stompClient, isStompConnected } = useContext(WebSocketContext);
@@ -681,12 +682,12 @@ const MeetingScreen = ({ meetingCode }) => {
                 Share this meeting link with others that you want in the meeting
               </p>
               <div className="no-participant-meeting-code">
-                <span>{`http://localhost:5173/${meetingCode}`}</span>
+                <span>{`${AppConfig.appRoot}/${meetingCode}`}</span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     navigator.clipboard
-                      .writeText(`http://localhost:5173/${meetingCode}`)
+                      .writeText(`${AppConfig.appRoot}/${meetingCode}`)
                       .then(() => setIsMeetLinkCopied(true));
                   }}
                 >

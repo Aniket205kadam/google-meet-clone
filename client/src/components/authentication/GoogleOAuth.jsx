@@ -12,11 +12,7 @@ const GoogleOAuth = ({ onSuccess }) => {
           anytime, anywhere! 🌍💖
         </p>
         <div className="google-btn">
-          <GoogleOAuthProvider
-            clientId={
-              "124901773879-5kmmti7roq0ug9l296405mlucv185nnq.apps.googleusercontent.com"
-            }
-          >
+          <GoogleOAuthProvider clientId={AppConfig.googleClientId}>
             <GoogleLogin
               onSuccess={onSuccess}
               onError={() => {}}
