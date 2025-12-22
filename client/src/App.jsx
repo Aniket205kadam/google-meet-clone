@@ -190,7 +190,9 @@ const AppContent = () => {
   }, []);
 
   useEffect(() => {
-    window.scrollY(100)
+    setTimeout(() => {
+      window.scrollTo(0, 1);
+    }, 100);
   }, []);
 
   useEffect(() => {
