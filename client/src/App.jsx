@@ -136,7 +136,7 @@ const AppContent = () => {
   const userService = new UserService(accessToken);
 
   const timeoutId = useRef(null);
-  
+
   const loadNewAccessToken = async () => {
     try {
       setLoading(true);
@@ -187,6 +187,10 @@ const AppContent = () => {
 
   useEffect(() => {
     initConfig();
+  }, []);
+
+  useEffect(() => {
+    setTimeout(() => window.scrollTo(0, 1), 100);
   }, []);
 
   useEffect(() => {

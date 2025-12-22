@@ -281,6 +281,10 @@
     z-index: 100;
 }
 
+#container-div {
+    width: 100%;
+}
+
 @keyframes scroll-left {
     0% {
         transform: translateX(0);
