@@ -30,6 +30,7 @@ import PreJoinScreen from "./pages/meeting/preJoinScreen/PreJoinScreen";
 import MeetingScreen from "./pages/meeting/meetingScreen/MeetingScreen";
 import Meeting from "./pages/meeting/main/Meeting";
 import AppConfig from "./config/AppConfig";
+import { useWindowWidth } from "./hooks/useWindowWidth";
 
 const AppRoutes = () => (
   <Routes>
@@ -129,6 +130,8 @@ const AppContent = () => {
     profile: "",
   });
 
+  const screenWidth = useWindowWidth();
+
   const { accessToken, isAuthenticated } = useSelector(
     (state) => state.authentication
   );
@@ -190,9 +193,11 @@ const AppContent = () => {
   }, []);
 
   useEffect(() => {
-    setTimeout(() => {
-      window.scrollTo(0, 1);
-    }, 100);
+    if (screenWidth <= 500) {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+      }
+    }
   }, []);
 
   useEffect(() => {
