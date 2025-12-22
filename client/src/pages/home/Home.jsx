@@ -103,6 +103,12 @@ const Home = () => {
     getCallHistory();
   }, [currentPageNo]);
 
+  useEffect(() => {
+    if (width <= 500) {
+      setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 300);
+    }
+  }, []);
+
   if (width >= 500) {
     return (
       <HomeDesktop
