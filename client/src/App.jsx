@@ -194,9 +194,7 @@ const AppContent = () => {
 
   useEffect(() => {
     if (screenWidth <= 500) {
-      if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen();
-      }
+      setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 300);
     }
   }, []);
 
