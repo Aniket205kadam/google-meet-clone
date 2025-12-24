@@ -152,7 +152,7 @@ const VideoCalling = () => {
     return () => stopCamera();
   }, [facingMode]);
 
-  useEffect(() => setCallState(callStatus.toLowerCase()), [callStatus]);
+  useEffect(() => setCallState(callStatus?.toLowerCase()), [callStatus]);
 
   useEffect(() => {
     if (connectedUser.email.length > 0 && targetUser.email.length > 0) {
