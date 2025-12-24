@@ -372,7 +372,7 @@ const BeforeCall = () => {
                   Video call
                 </button>
               </div>
-              <p className="call-as">Calling as {currentUser.email}</p>
+              <p className="call-as">Calling as {currentUser?.email}</p>
               {!isGotIt && (
                 <div className="calling-warning">
                   <div className="warning-info">

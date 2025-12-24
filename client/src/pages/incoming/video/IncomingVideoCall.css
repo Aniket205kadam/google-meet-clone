@@ -11,6 +11,7 @@
 }
 
 .incoming-call-user {
+    width: 100vw;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -19,10 +20,11 @@
     height: 30%;
 }
 
-.incoming-user-profile {
-    width: 150px;
-    height: 150px;
+.incoming-call-user img {
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
+    object-fit: cover;
 }
 
 .call-info {
@@ -49,7 +51,10 @@
 
 .incoming-call-camera video {
     width: 100%;
-    height: 90%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    object-position: center;
 }
 
 .incoming-call-camera-action {
@@ -60,6 +65,10 @@
     gap: 100px;
 }
 
+.take-place {
+    flex: 1;
+}
+
 .incoming-flip-camera,
 .incoming-video {
     display: flex;
@@ -67,14 +76,14 @@
     align-items: center;
     width: 50px;
     height: 50px;
-    background-color: rgba(0, 136, 255, 0.384);
+    background-color: rgba(0, 136, 255, 0.674);
     margin-bottom: 20px;
     border-radius: 50%;
 }
 
 .incoming-call-answer {
     width: 100vw;
-    height: 20%;
+    height: 25%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -94,7 +103,7 @@
 }
 
 .call-answer-btn svg {
-    fill: #000000db;
+    fill: #ffffff;
 }
 
 .answer-info {

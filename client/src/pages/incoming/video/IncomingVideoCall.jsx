@@ -202,10 +202,9 @@ const IncomingVideoCall = ({ callInfo }) => {
         <audio src={Ringing} loop autoPlay />
         <div className="incoming-call-user">
           <img
-            className="incoming-user-profile"
             src={callInfo.caller.profile}
           />
-          <span className="call-info">Incoming video call</span>
+          <span className="call-info">Incoming {callInfo.mode.toLocaleLowerCase()} call</span>
           <span className="caller-email">{callInfo.caller.fullName}</span>
         </div>
         {callInfo.mode === "VIDEO" && (
@@ -238,7 +237,8 @@ const IncomingVideoCall = ({ callInfo }) => {
           </div>
         )}
 
-        {callInfo.mode === "VIDEO" && <div className="occupy-space"></div>}
+        {callInfo.mode === "AUDIO" && <div className="take-place"></div>}
+
         <div className="incoming-call-answer">
           <span className="answer-info">Swipe up to answer</span>
           <div
