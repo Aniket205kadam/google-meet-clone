@@ -20,17 +20,12 @@ import JoinWithCode from "./pages/joinWithCode/JoinWithCode";
 import BeforeCall from "./pages/beforeCall/BeforeCall";
 import VideoCalling from "./pages/calling/video/VideoCalling";
 import AudioCalling from "./pages/calling/audio/AudioCalling";
-import SockJS from "sockjs-client/dist/sockjs.js";
-import Stomp from "stompjs";
 import UserService from "./services/UserService";
 import WebSocketProvider from "./components/webSocket/WebSocketProvider";
-import IncomingVideoCall from "./pages/incoming/video/IncomingVideoCall";
 import VideoCallScreen from "./pages/videoCallScreen/VideoCallScreen";
-import PreJoinScreen from "./pages/meeting/preJoinScreen/PreJoinScreen";
-import MeetingScreen from "./pages/meeting/meetingScreen/MeetingScreen";
 import Meeting from "./pages/meeting/main/Meeting";
-import AppConfig from "./config/AppConfig";
 import { useWindowWidth } from "./hooks/useWindowWidth";
+import AudioCallScreen from "./pages/audioCallScreen/AudioCallScreen";
 
 const AppRoutes = () => (
   <Routes>
@@ -113,6 +108,14 @@ const AppRoutes = () => (
           <VideoCallScreen />
         </ProtectedRoute>
       }
+    />
+    <Route
+    path="/audio/call/:callId"
+    element={
+      <ProtectedRoute>
+        <AudioCallScreen />
+      </ProtectedRoute>
+    }
     />
     <Route path="*" element={<NotFoundPage />} />
   </Routes>

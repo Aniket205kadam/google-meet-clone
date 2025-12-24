@@ -7,6 +7,8 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { WebSocketContext } from "../../../components/webSocket/WebSocketProvider";
 import CallService from "../../../services/CallService";
+import { useWindowWidth } from "../../../hooks/useWindowWidth";
+import calling from "../../../assets/music/calling.mp3";
 
 const AudioCalling = () => {
   const { targetUserId } = useParams();
@@ -31,6 +33,9 @@ const AudioCalling = () => {
   const callService = new CallService(accessToken);
   const [currentCall, setCurrentCall] = useState();
   const { stompClient, callStatus } = useContext(WebSocketContext);
+  const [isFullOpen, setIsFullOpen] = useState(false);
+
+  const screenWidth = useWindowWidth();
 
   const getUserById = async () => {
     try {
@@ -64,8 +69,14 @@ const AudioCalling = () => {
     } catch (error) {
       console.error("Failed to send call request: ", error);
       toast.warn(error?.response?.data?.message || "Something is wrong");
-      navigate("/search-users");
+      navigate("/");
     }
+  };
+
+  const callEnd = async () => {
+    if (!currentCall.id) return;
+    await callService.endCall(currentCall.id);
+    navigate("/");
   };
 
   useEffect(() => {
@@ -95,8 +106,114 @@ const AudioCalling = () => {
           navigate("/");
         }
       );
+
+      stompClient.current.subscribe(
+        `/topic/call/accept/${currentCall.id}/${connectedUser.email}`,
+        (message) => {
+          const callId = currentCall.id;
+          setCurrentCall(null);
+          navigate(`/audio/call/${callId}`);
+        }
+      );
     }
   }, [stompClient, connectedUser, currentCall]);
+
+  useEffect(() => {
+    if (
+      currentCall &&
+      stompClient.current &&
+      stompClient.current.connected &&
+      connectedUser.email.length > 0
+    ) {
+      stompClient.current.subscribe(
+        `/topic/call/reject/${currentCall.id}/${connectedUser.email}`,
+        (message) => {
+          toast.info(message);
+          navigate("/");
+        }
+      );
+    }
+  }, [stompClient, connectedUser, currentCall]);
+
+  if (screenWidth > 500) {
+    return (
+      <div className="desktop-video-calling-page">
+        <audio src={calling} autoPlay loop />
+        <div
+          className={`desktop-video-calling-container ${
+            isFullOpen ? "full-open" : ""
+          }`}
+        >
+          <div className="desktop-video-calling-header">
+            <div className="desktop-video-calling-target-email">
+              {targetUser?.email}
+            </div>
+            <div className="desktop-video-calling-status">
+              <div className="status">{callState}...</div>
+              <div
+                className="status-symbol"
+                onClick={() => setIsFullOpen((prev) => !prev)}
+              >
+                {isFullOpen ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="24px"
+                    viewBox="0 -960 960 960"
+                    width="24px"
+                    fill="#e3e3e3"
+                  >
+                    <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v280h-80v-280H200v560h280v80H200Zm360 0v-80h144L332-572l56-56 372 371v-143h80v280H560Z" />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="24px"
+                    viewBox="0 -960 960 960"
+                    width="24px"
+                    fill="#e3e3e3"
+                  >
+                    <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z" />
+                  </svg>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="encrypted-info">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#e3e3e3"
+            >
+              <path d="M420-360h120l-23-129q20-10 31.5-29t11.5-42q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 23 11.5 42t31.5 29l-23 129Zm60 280q-139-35-229.5-159.5T160-516v-244l320-120 320 120v244q0 152-90.5 276.5T480-80Zm0-84q104-33 172-132t68-220v-189l-240-90-240 90v189q0 121 68 220t172 132Zm0-316Z" />
+            </svg>
+            This call is encrypted
+          </div>
+          <div
+            className={`desktop-video-calling-main ${
+              isFullOpen ? "full-open" : ""
+            }`}
+          >
+            <div className="desktop-audio-target-user">
+              <img
+                style={isFullOpen ? { width: "200px", height: "200px" } : {}}
+                src={targetUser?.profile}
+                alt={targetUser?.fullName + " profile"}
+              />
+            </div>
+          </div>
+          <CallAction
+            camera={false}
+            audio={isAudioOn}
+            setCamera={() => {}}
+            setAudio={setIsAudioOn}
+            endCall={callEnd}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="audio-calling-page">
@@ -140,7 +257,7 @@ const AudioCalling = () => {
         </div>
       </div>
 
-      <div className="audio-call-info">
+      <div className="audio-call-info1">
         {callState === "calling" ? (
           <div className="audio-call-status">
             Calling
