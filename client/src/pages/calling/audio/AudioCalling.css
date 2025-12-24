@@ -23,7 +23,7 @@
     align-items: center;
 }
 
-.audio-call-info {
+.audio-call-info1 {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -87,6 +87,25 @@
 
 .dot-animation span:nth-child(3) {
     animation-delay: 0.6s;
+}
+
+.desktop-audio-target-user {
+    width: 80%;
+    height: 100%;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #313131;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.171) 2px, transparent 0);
+    background-size: 30px 30px;
+    background-position: -5px -5px
+}
+
+.desktop-audio-target-user img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
 }
 
 @keyframes blink {

@@ -14,12 +14,6 @@
     z-index: 10000000;
 }
 
-@media(max-width: 500px) {
-    .tool-box-container {
-        height: 40%;
-    }
-}
-
 .row1,
 .row2,
 .row3 {

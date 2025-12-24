@@ -1,0 +1,103 @@
+.video-call-main {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+.remote-user-profile-audio {
+    width: 90%;
+    height: 70%;
+    background-color: #601300;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    box-sizing: content-box;
+    position: relative;
+}
+
+.remote-user-name-audio {
+    color: #ffffff;
+    position: absolute;
+    bottom: 2%;
+    left: 2%;
+    font-weight: 500;
+}
+
+.remote-user-profile-audio img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.current-user-profile-audio {
+    width: 400px;
+    height: 200px;
+    background-color: #00382f;
+    border-radius: 10px;
+    position: absolute;
+    bottom: 20%;
+    right: 2%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: content-box;
+}
+
+.current-user-profile-audio img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.current-user-name-audio {
+    font-size: .8rem;
+    color: #ffffff;
+    font-weight: 500;
+    position: absolute;
+    bottom: 2%;
+    left: 2%;
+}
+
+.audio-call-info {
+    color: #ffffff;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.timer {
+    font-size: .9rem;
+    color: #c3c3c3;
+}
+
+.caller-name {
+   font-size: 2.3rem;
+   font-weight: 500;
+}
+
+.call-status1 {
+    color: #c3c3c3;
+}
+
+@media (max-width: 500px) {
+
+    .remote-user-profile-audio img {
+        width: 200px;
+        height: 200px;
+    }
+
+    .remote-user-profile-audio {
+        background-color: inherit;
+        margin-top: 30%;
+    }
+
+    .current-user-profile-audio {
+        display: none;
+    }
+}

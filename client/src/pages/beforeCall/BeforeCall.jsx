@@ -331,7 +331,10 @@ const BeforeCall = () => {
             <div className="desktop-call-options">
               <h1>Ready to call?</h1>
               <div className="btn-call-desktop">
-                <button className="desktop-voice-call">
+                <button
+                  className="desktop-voice-call"
+                  onClick={() => navigate(`/audio-calling/${targetUser.id}`)}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     height="24px"

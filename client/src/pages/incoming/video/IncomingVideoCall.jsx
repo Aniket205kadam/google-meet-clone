@@ -57,7 +57,11 @@ const IncomingVideoCall = ({ callInfo }) => {
       }
       const callId = callInfo.id;
       setIncomingCall({ status: false, data: {} });
-      navigate(`/calls/${callId}`);
+      if (callInfo.mode === "AUDIO") {
+        navigate(`/audio/call/${callId}`);
+      } else {
+        navigate(`/calls/${callId}`);
+      }
     } catch (error) {
       toast.error("Failed to accept the call!");
     } finally {
