@@ -103,6 +103,13 @@
     object-fit: cover;
 }
 
+.close-icon {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .add-another-image {
     width: 50%;
     position: absolute;
@@ -152,4 +159,41 @@
 .goto-settings:active {
     background-color: #ffffff;
     color: #000000;
+}
+
+@media (min-width: 500px) {
+    
+    .account-info-container {
+        background-color: #eeeeee;
+        width: 50%;
+        color: #000000;
+    }
+
+    .account-heading {
+        color: #212121;
+        flex-direction: row-reverse;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .account-heading svg {
+        fill: #000000;
+    }
+
+    .main-container {
+        background-color: #c7c7c7;
+        color: #000000;
+    }
+
+    .main-container svg {
+        fill: #000000;
+    }
+
+    .add-another-image {
+        background-color: #eeeeee;
+    }
+
+    .policy {
+        color: #212121;
+    }
 }

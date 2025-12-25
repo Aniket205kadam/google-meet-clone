@@ -79,6 +79,7 @@
 
 .menu-header-profile {
     display: flex;
+    cursor: pointer;
 }
 
 .menu-app {

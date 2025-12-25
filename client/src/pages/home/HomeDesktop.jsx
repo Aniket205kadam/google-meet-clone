@@ -22,6 +22,7 @@ import MeetingService from "../../services/MeetingService";
 import InfoToast from "../../components/toast/infoToast/InfoToast";
 import { useNavigate } from "react-router-dom";
 import AppConfig from "../../config/AppConfig";
+import AccountInfo from "../../components/modal/account/AccountInfo";
 
 const HomeDesktop = ({
   currentUser,
@@ -55,6 +56,7 @@ const HomeDesktop = ({
   });
   const [isShowCreateMeetingCode, setIsShowCreateMeetingCode] = useState(false);
   const [customToast, setCustomToast] = useState({ status: false, info: "" });
+  const [isShowAccountInfo, setIsShowAccountInfo] = useState(false);
 
   const userService = new UserService(accessToken);
   const meetingService = new MeetingService(accessToken);
@@ -73,6 +75,7 @@ const HomeDesktop = ({
   const searchMoreContainerRef = useRef(null);
   const meetingOptionRef = useRef(null);
   const createMeetingCodeRef = useRef(null);
+  const accountInfoRef = useRef(null);
 
   useClickOutside(callMoreRef, () => setIsShowCallMore(false));
   useClickOutside(searchMoreContainerRef, () => setIsShowSearch(false));
@@ -82,6 +85,7 @@ const HomeDesktop = ({
   useClickOutside(createMeetingCodeRef, () =>
     setIsShowCreateMeetingCode(false)
   );
+  useClickOutside(accountInfoRef, () => setIsShowAccountInfo(false));
 
   const width = useWindowWidth();
 
@@ -222,6 +226,16 @@ const HomeDesktop = ({
 
       {customToast.status && <InfoToast info={customToast.info} />}
 
+      {isShowAccountInfo && (
+        <AccountInfo
+          profileImg={currentUser.profile}
+          fullName={currentUser.fullName}
+          email={currentUser.email}
+          ref={accountInfoRef}
+          onClose={() => setIsShowAccountInfo(false)}
+        />
+      )}
+
       <div className="window-home-page-header">
         <div className="menu-header-left">
           <div
@@ -294,7 +308,10 @@ const HomeDesktop = ({
               </svg>
             </div>
           </div>
-          <div className="menu-header-profile menu-app">
+          <div
+            className="menu-header-profile menu-app"
+            onClick={() => setIsShowAccountInfo(true)}
+          >
             <img
               src={
                 currentUser?.profile ||
@@ -393,10 +410,7 @@ const HomeDesktop = ({
                     placeholder="Enter a code or link"
                     value={meetingCode}
                     onChange={(e) => {
-                      const code = e.target.value.replace(
-                        `${APP_ROOT}`,
-                        ""
-                      );
+                      const code = e.target.value.replace(`${APP_ROOT}`, "");
                       setMeetingCode(code);
                     }}
                   />

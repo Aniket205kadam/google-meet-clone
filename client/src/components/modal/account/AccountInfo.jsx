@@ -75,7 +75,18 @@ const AccountInfo = ({ profileImg, fullName, email, onClose, ref }) => {
         </div>
       </div>
       <span className="policy">
-        <a href="#">Privacy Policy</a> - <a href="#">Terms of Service</a>
+        <a href="#">Privacy Policy</a>{" "}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="6"></circle>
+        </svg>{" "}
+        <a href="#">Terms of Service</a>
       </span>
     </div>
   );

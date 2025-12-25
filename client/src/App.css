@@ -1,3 +1,20 @@
+* {
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100dvh;
+  overflow-y: auto;
+}
+
+
 .page-loader-container {
     width: 100vw;
     height: 100vh;
@@ -27,7 +44,7 @@
     }
 }
 
-@keyframes barLoading { 
+@keyframes barLoading {
     0% {
         width: 0%;
     }
@@ -67,7 +84,7 @@
     90% {
         width: 90%;
     }
-    
+
     100% {
         width: 100%;
     }
