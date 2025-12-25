@@ -18,7 +18,6 @@ const Login = () => {
   const [profile, setProfile] = useState("");
   const dispatch = useDispatch();
   const connectedUser = useSelector((state) => state.authentication);
-  const pageRef = useRef();
 
   const googleOAuthHandler = async (credentialResponse) => {
     try {
