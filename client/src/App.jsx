@@ -110,12 +110,12 @@ const AppRoutes = () => (
       }
     />
     <Route
-    path="/audio/call/:callId"
-    element={
-      <ProtectedRoute>
-        <AudioCallScreen />
-      </ProtectedRoute>
-    }
+      path="/audio/call/:callId"
+      element={
+        <ProtectedRoute>
+          <AudioCallScreen />
+        </ProtectedRoute>
+      }
     />
     <Route path="*" element={<NotFoundPage />} />
   </Routes>
@@ -125,15 +125,13 @@ const AppContent = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const stompClient = useRef(null);
   const [connectedUser, setConnectedUser] = useState({
     id: "",
     fullName: "",
     email: "",
     profile: "",
   });
-
-  const screenWidth = useWindowWidth();
+  const [showMore, setShowMore] = useState(false);
 
   const { accessToken, isAuthenticated } = useSelector(
     (state) => state.authentication
@@ -208,6 +206,24 @@ const AppContent = () => {
           <div className="progress-bar"></div>
         </div>
         <PageLoader />
+        <div
+          className="loading-reason-info"
+          style={showMore ? { bottom: "23%" } : { bottom: "35%" }}
+        >
+          <div className="loading-info">
+            Please wait. This may take a few seconds.
+          </div>
+          {!showMore && (
+            <button onClick={() => setShowMore(true)}>Learn more</button>
+          )}
+          {showMore && (
+            <div className="loading-reason">
+              The backend is hosted on Render. When there are no requests, the
+              server goes into sleep mode. The first request wakes it up, which
+              takes around 30–50 seconds.
+            </div>
+          )}
+        </div>
       </div>
     );
   }

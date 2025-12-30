@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./Login.css";
 import GoogleOAuth from "../../components/authentication/GoogleOAuth";
 import GetPersonalInfo from "../../components/authentication/GetPersonalInfo";
@@ -17,7 +17,12 @@ const Login = () => {
   const [birthDate, setBirthDate] = useState("");
   const [profile, setProfile] = useState("");
   const dispatch = useDispatch();
-  const connectedUser = useSelector((state) => state.authentication);
+
+  const mainRef = useRef(null);
+
+  useEffect(() => {
+    // mainRef.current.scrollTop = mainRef.current.scrollHeight;
+  }, []);
 
   const googleOAuthHandler = async (credentialResponse) => {
     try {
@@ -67,7 +72,7 @@ const Login = () => {
   };
 
   return (
-    <div className="login-page">
+    <div className="login-page" ref={mainRef}>
       <LoginBackground />
 
       {/* <AuthLoading /> */}

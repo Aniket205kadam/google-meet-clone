@@ -38,9 +38,55 @@ body {
     animation-timing-function: ease-in-out;
 }
 
+.loading-reason-info {
+    width: 100%;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-info {
+    font-size: 1rem;
+    color: #323232;
+}
+
+.loading-reason-info button {
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    color: #323232;
+    border-radius: 50px;
+    cursor: pointer;
+}
+
+.loading-reason-info button:hover {
+    background-color: #e1e1e1;
+}
+
+.loading-reason {
+    background-color: #4eaff5;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 10px;
+    color: #ffffff;
+}
+
 @media (max-width: 500px) {
     svg {
         fill: #ffffff;
+    }
+
+    .loading-reason {
+        width: 95%;
+    }
+
+}
+
+@media (min-width: 500px) {
+    .loading-reason {
+        width: 400px;
     }
 }
 
