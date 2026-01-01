@@ -1,7 +1,6 @@
 # Google Meet Clone
 
 ## Demo video
-
 [![Watch the video](https://img.youtube.com/vi/sjE_NzMPQcM/maxresdefault.jpg)](https://youtu.be/sjE_NzMPQcM)
 
 
