@@ -20,10 +20,6 @@ const Login = () => {
 
   const mainRef = useRef(null);
 
-  useEffect(() => {
-    // mainRef.current.scrollTop = mainRef.current.scrollHeight;
-  }, []);
-
   const googleOAuthHandler = async (credentialResponse) => {
     try {
       const response = await loginWithOAuth(credentialResponse.credential);
