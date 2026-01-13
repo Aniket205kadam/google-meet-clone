@@ -107,6 +107,7 @@ public class MeetingService {
         repository.save(meeting);
 
         var admin = meeting.getCreatedBy();
+
         messagingTemplate.convertAndSend(
                 "/topic/waiting/users/" + meetingCode + "/" + admin.getEmail(),
                 userMapper.toUserResponse(connectedUser)

@@ -20,14 +20,14 @@ public interface UserRepository extends JpaRepository<User, String> {
     """, nativeQuery = true)
     List<User> findRandomUser(@Param("size") int limit);
 
-    @Query(value = """
-            SELECT * FROM users
-            WHERE full_name ILIKE CONCAT('%', :keyword, '%')
-                   OR phone ILIKE CONCAT('%', :keyword, '%')
-                   OR email ILIKE CONCAT('%', :keyword, '%')
-                LIMIT :size
-            """,
-            nativeQuery = true
-    )
-    List<User> searchByFullNameOrPhoneOrEmail(@Param("keyword") String keyword, @Param("size") Integer size);
-}
+        @Query(value = """
+                SELECT * FROM users
+                WHERE full_name ILIKE CONCAT('%', :keyword, '%')
+                       OR phone ILIKE CONCAT('%', :keyword, '%')
+                       OR email ILIKE CONCAT('%', :keyword, '%')
+                    LIMIT :size
+                """,
+                nativeQuery = true
+        )
+        List<User> searchByFullNameOrPhoneOrEmail(@Param("keyword") String keyword, @Param("size") Integer size);
+    }

@@ -94,7 +94,7 @@ public class AuthenticationService {
                 .build();
     }
 
-    private GoogleIdToken verifyGoogleToken(String token) throws GeneralSecurityException, IOException {
+    GoogleIdToken verifyGoogleToken(String token) throws GeneralSecurityException, IOException {
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
                 new NetHttpTransport(),
                 JacksonFactory.getDefaultInstance()

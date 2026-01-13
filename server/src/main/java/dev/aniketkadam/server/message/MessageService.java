@@ -23,7 +23,6 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final MessageMapper mapper;
     private final SimpMessagingTemplate messagingTemplate;
-    private final CallRepository callRepository;
 
     @Transactional
     public MessageResponse sendMessage(String callId, String content, Authentication authentication) throws OperationNotPermittedException {
@@ -64,7 +63,7 @@ public class MessageService {
 
     public List<MessageResponse> getMessagesByCallId(String callId, Authentication authentication) throws OperationNotPermittedException {
         User connectedUser = (User) authentication.getPrincipal();
-        Call call = callRepository.findById(callId)
+        Call call = repository.findById(callId)
                 .orElseThrow(() -> new EntityNotFoundException("Call is not found with Id: " + callId));
         boolean isCaller = call.getCaller().getEmail().equals(connectedUser.getEmail());
         boolean isReceiver = call.getReceiver().getEmail().equals(connectedUser.getEmail());
