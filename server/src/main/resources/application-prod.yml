@@ -31,8 +31,8 @@ spring:
 application:
   security:
     jwt:
-      access-token-expiration: 900000 # Access token expires in 15 minutes
-      refresh-token-expiration: 604800000 # Refresh token expires in 7 days
+      access-token-expiration: 900000
+      refresh-token-expiration: 604800000
       secret-key: ${SERVER_SECRET}
     access-origins:
       frontend: ${FRONTEND_URL}

@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: namaskar-server-test
+  datasource:
+    url: jdbc:tc:postgresql:11-alpine:///testdb
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: test
+    password: test
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+application:
+  security:
+    jwt:
+      secret-key: test-secret-key-test-secret-key-test
+      access-token-expiration: 900000
+      refresh-token-expiration: 604800000
+    access-origins:
+      frontend: http://localhost:3000
+  mail:
+    from: test@example.com
+    reply-to: test@example.com
+  cloudinary:
+    cloud-name: test
+    api-key: test
+    api-secret: test

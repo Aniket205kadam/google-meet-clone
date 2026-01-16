@@ -2,7 +2,6 @@ package dev.aniketkadam.server.handler;
 
 import dev.aniketkadam.server.exception.OperationNotPermittedException;
 import dev.aniketkadam.server.exception.RefreshTokenException;
-import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -59,17 +58,6 @@ public class GlobalExceptionHandler {
                 .status(NOT_FOUND)
                 .body(ExceptionResponse.builder()
                         .message(exception.getMessage())
-                        .businessErrorCode(NOT_FOUND.value())
-                        .build());
-    }
-
-    @ExceptionHandler(MessagingException.class)
-    public ResponseEntity<ExceptionResponse> exceptionHandler(MessagingException exception) {
-        return ResponseEntity
-                .status(NOT_FOUND)
-                .body(ExceptionResponse.builder()
-                        .message("Unable to send email!")
-                        .businessErrorDescription(exception.getMessage())
                         .businessErrorCode(NOT_FOUND.value())
                         .build());
     }
