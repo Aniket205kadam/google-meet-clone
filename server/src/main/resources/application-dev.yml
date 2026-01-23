@@ -2,9 +2,9 @@ spring:
   application:
     name: namaskar-server
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/namaskar
+    username: postgres
+    password: postgres-password
     driver-class-name: org.postgresql.Driver
     hikari:
       max-lifetime: 60000

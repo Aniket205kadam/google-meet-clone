@@ -1,26 +1,26 @@
 spring:
   application:
-    name: namaskar-server
+    name: ${SERVER_NAME}
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
+    driver-class-name: ${DB_DRIVER_CLASS_NAME}
     hikari:
-      max-lifetime: 60000
-      idle-timeout: 30000
-      connection-timeout: 30000
+      max-lifetime: ${DB_HIKARI_MAX_LIFETIME}
+      idle-timeout: ${DB_IDLE_TIMEOUT}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT}
   jpa:
-    show-sql: false
+    show-sql: ${DB_SHOW_SQL}
     hibernate:
-      ddl-auto: create
+      ddl-auto: ${DB_DDL_COMMAND}
     properties:
       hibernate:
-        format_sql: true
+        format_sql: ${DB_FORMAT_SQL}
         connection:
-          timezone: Asia/Kolkata
-    database: POSTGRESQL
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+          timezone: ${DB_CONNECTION_TIMEZONE}
+    database: ${DATABASE_NAME}
+    database-platform: ${DATABASE_PLATFORM}
   security:
     oauth2:
       client:
@@ -31,8 +31,8 @@ spring:
 application:
   security:
     jwt:
-      access-token-expiration: 900000
-      refresh-token-expiration: 604800000
+      access-token-expiration: ${ACCESS_TOKEN_EXPIRATION}
+      refresh-token-expiration: ${REFRESH_TOKEN_EXPIRATION}
       secret-key: ${SERVER_SECRET}
     access-origins:
       frontend: ${FRONTEND_URL}

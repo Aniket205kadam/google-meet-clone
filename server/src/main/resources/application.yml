@@ -2,7 +2,7 @@ spring:
   application:
     name: namaskar-server
   profiles:
-    active: dev
+    active: prod
   servlet:
     multipart:
       max-file-size: 50MB
@@ -10,3 +10,7 @@ spring:
   devtools:
     restart:
       enabled: false
+# logging:
+#   level:
+#     dev:
+#       aniketkadam: trace
