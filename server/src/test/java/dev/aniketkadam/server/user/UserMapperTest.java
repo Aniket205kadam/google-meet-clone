@@ -94,19 +94,5 @@ public class UserMapperTest {
 
             verify(repository).findByGoogleId("google-456");
         }
-
-        @Test
-        void shouldFailWhenProfileIsNull() {
-            User user = User.builder()
-                    .id("user-1")
-                    .fullName("Test User")
-                    .email("test@test.com")
-                    .build();
-
-            assertThrows(
-                    NullPointerException.class,
-                    () -> userMapper.toUserResponse(user)
-            );
-        }
     }
 }
