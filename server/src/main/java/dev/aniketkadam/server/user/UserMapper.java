@@ -33,7 +33,7 @@ public class UserMapper {
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .birthDate(user.getBirthDate())
-                .profile(user.getProfile().getProfileUrl())
+                .profile(user.getProfile() != null ? user.getProfile().getProfileUrl() : "")
                 .build();
     }
 }

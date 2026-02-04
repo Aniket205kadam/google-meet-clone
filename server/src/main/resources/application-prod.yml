@@ -13,7 +13,7 @@ spring:
   jpa:
     show-sql: ${DB_SHOW_SQL}
     hibernate:
-      ddl-auto: ${DB_DDL_COMMAND}
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: ${DB_FORMAT_SQL}
