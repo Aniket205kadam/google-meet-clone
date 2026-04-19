@@ -35,6 +35,15 @@ services:
     depends_on:
       - postgres
 
+  #whisper:
+   # image: ghcr.io/guillaumekln/faster-whisper:latest
+    #container_name: whisper
+    #volumes:
+     # - ./audio:/audio
+      #- whisper_models:/root/.cache
+    #command:
+     # - whisper /audio
+
 networks:
   namaskar:
     driver: bridge

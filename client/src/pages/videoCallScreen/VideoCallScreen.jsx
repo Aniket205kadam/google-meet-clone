@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { WebSocketContext } from "../../components/webSocket/WebSocketProvider"; // adjust path
+import { WebSocketContext } from "../../components/webSocket/WebSocketProvider";
 import CallService from "../../services/CallService";
 import UserService from "../../services/UserService";
 import InCallMessages from "../../components/inCallMessages/InCallMessages";
@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import useClickOutside from "../../hooks/useClickOutside";
 import { EmojiMap } from "../../utils/emojis/EmojiMap";
 import { useWindowWidth } from "../../hooks/useWindowWidth";
+import useSpeechDetection from "../../hooks/useSpeechDetection";
 
 const VideoCallScreen = () => {
   const { callId } = useParams();
@@ -41,6 +42,7 @@ const VideoCallScreen = () => {
   const [isMessageUnseen, setIsMessageUnseen] = useState(false);
   const [currentHandAction, setCurrentHandAction] = useState(null);
   const [isShowCallDetails, setIsShowCallDetails] = useState(false);
+  const [isTargetUserOnCaption, setIsTargetUserOnCaption] = useState(false);
 
   const currentUserRef = useRef(null);
   const callDetailsRef = useRef(null);
@@ -51,6 +53,7 @@ const VideoCallScreen = () => {
   const remoteStreamRef = useRef(null);
   const peerConnectionRef = useRef(null);
   const isOpenMessageBoxRef = useRef(false);
+  const recorderRef = useRef(null);
 
   const navigate = useNavigate();
   const currentTime = new Date().toLocaleTimeString("en-US", {
@@ -64,6 +67,8 @@ const VideoCallScreen = () => {
 
   useClickOutside(toolBoxRef, () => setIsToolBoxOpen(false));
   const screenWidth = useWindowWidth();
+
+  useSpeechDetection(() => {}, () => {});
 
   const getCameraStream = async () => {
     try {
@@ -170,7 +175,7 @@ const VideoCallScreen = () => {
         stompClient.current.send(
           "/app/webrtc",
           {},
-          JSON.stringify(candidateRequest)
+          JSON.stringify(candidateRequest),
         );
       }
     };
@@ -210,7 +215,7 @@ const VideoCallScreen = () => {
       (request) => {
         const data = JSON.parse(request.body);
         handleIncomingSignals(data);
-      }
+      },
     );
   };
 
@@ -220,7 +225,7 @@ const VideoCallScreen = () => {
       (request) => {
         toast.info("Call ended.");
         navigate("/");
-      }
+      },
     );
   };
 
@@ -236,7 +241,7 @@ const VideoCallScreen = () => {
         } else {
           console.error("Media action in wrong format.");
         }
-      }
+      },
     );
   };
 
@@ -248,7 +253,7 @@ const VideoCallScreen = () => {
         const value = Math.floor(Math.random() * (80 - 20 + 1)) + 20;
         setRandomValue(value);
         setCurrentReaction({ emoji: data.emoji, name: data.name });
-      }
+      },
     );
   };
 
@@ -261,7 +266,7 @@ const VideoCallScreen = () => {
         if (!isOpenMessageBoxRef.current) {
           setIsMessageUnseen(true);
         }
-      }
+      },
     );
   };
 
@@ -275,7 +280,7 @@ const VideoCallScreen = () => {
         } else if (data.action === "PUT_DOWN") {
           setCurrentHandAction(null);
         }
-      }
+      },
     );
   };
 
@@ -297,7 +302,7 @@ const VideoCallScreen = () => {
             to: callDetailsRef.current.receiver.email,
             type: "offer",
             sdp: offer.sdp,
-          })
+          }),
         );
       }
     } catch (error) {
@@ -326,7 +331,7 @@ const VideoCallScreen = () => {
       }
       const peerConnection = peerConnectionRef.current;
       await peerConnection.setRemoteDescription(
-        new RTCSessionDescription({ type: "offer", sdp: data.sdp })
+        new RTCSessionDescription({ type: "offer", sdp: data.sdp }),
       );
 
       const answer = await peerConnection.createAnswer();
@@ -342,7 +347,7 @@ const VideoCallScreen = () => {
             to: targetUserRef.current.email,
             type: "answer",
             sdp: answer.sdp,
-          })
+          }),
         );
       }
     } catch (error) {
@@ -390,7 +395,7 @@ const VideoCallScreen = () => {
       }
       const peerConnection = peerConnectionRef.current;
       await peerConnection.setRemoteDescription(
-        new RTCSessionDescription({ type: "answer", sdp: data.sdp })
+        new RTCSessionDescription({ type: "answer", sdp: data.sdp }),
       );
     } catch (error) {
       console.error("Failed to handle answer:", error);
@@ -417,6 +422,37 @@ const VideoCallScreen = () => {
     }
   };
 
+  const startOneSecondAudioStreaming = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    const mediaRecorder = new MediaRecorder(stream, {
+      mimeType: "audio/webm",
+    });
+
+    mediaRecorder.ondataavailable = async (event) => {
+      if (event.data.size === 0) return;
+
+      console.log("chunk:", event.data);
+    };
+
+    mediaRecorder.start(1000);
+
+    return mediaRecorder;
+  };
+
+  useEffect(() => {
+    const startAudioRecorder = async () => {
+      if (isTargetUserOnCaption) {
+        recorderRef.current = await startOneSecondAudioStreaming();
+      } else {
+        if (recorderRef.current) {
+          recorderRef.current.stop();
+        }
+      }
+    };
+    startAudioRecorder();
+  }, [isTargetUserOnCaption]);
+
   useEffect(() => {
     (async () => {
       await getCameraStream();
@@ -430,7 +466,7 @@ const VideoCallScreen = () => {
       setTargetUser(
         callDetails.caller.id === currentUser.id
           ? callDetails.receiver
-          : callDetails.caller
+          : callDetails.caller,
       );
       targetUserRef.current =
         callDetails.caller.id === currentUser.id
@@ -450,7 +486,7 @@ const VideoCallScreen = () => {
         `/topic/call/${callDetails.id}/ready/${currentUser.email}`,
         (res) => {
           sendOffer();
-        }
+        },
       );
       return () => {
         subscription?.unsubscribe?.();
@@ -508,7 +544,9 @@ const VideoCallScreen = () => {
 
   // before unmount the component stop camera
   useEffect(() => {
-    return () => stopCameraStream();
+    return () => {
+      stopCameraStream();
+    };
   }, []);
 
   useEffect(() => {
@@ -520,7 +558,7 @@ const VideoCallScreen = () => {
     if (currentReaction.name?.length > 0) {
       timeoutId = setTimeout(
         () => setCurrentReaction({ emoji: null, name: null }),
-        8000
+        8000,
       );
     }
     return () => clearTimeout(timeoutId);
@@ -549,6 +587,9 @@ const VideoCallScreen = () => {
 
   return (
     <div className="video-call-screen-page">
+
+<button onClick={() => setIsTargetUserOnCaption(prev => !prev)} style={{ zIndex: "1000000000"}}>CLICK</button>
+
       {isOpenMessageBox && (
         <InCallMessages
           callDetails={callDetails}
@@ -805,8 +846,8 @@ const VideoCallScreen = () => {
               ? { left: 2, opacity: "0" }
               : { opacity: "0" }
             : isReactionOpen
-            ? { left: 2 }
-            : {}
+              ? { left: 2 }
+              : {}
         }
       >
         <span
