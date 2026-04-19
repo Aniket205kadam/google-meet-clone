@@ -345,6 +345,7 @@ const HomeDesktop = ({
               </svg>
               {width > 800 && <span>Meetings</span>}
             </div>
+            <button onClick={() => navigate("/test")}>CLICK ME</button>
             <div
               className={`menubar-option ${
                 mainContent === "calls" ? "menubar-option-select" : ""

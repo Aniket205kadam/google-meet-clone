@@ -1,0 +1,165 @@
+.collaborative-whiteboard-container {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+
+    background-color: #ffffff;
+    background-image: radial-gradient(rgba(12, 12, 12, 0.15) 2px, transparent 0);
+    background-size: 30px 30px;
+    background-position: -5px -5px;
+}
+
+.collaborative-whiteboard-container canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+}
+
+/* drawing controls panel */
+.drawing-controls-panel {
+    width: 250px;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 10%;
+    left: 1%;
+    border-radius: 2%;
+    padding: 0.6rem;
+    font-size: 24px;
+    font-weight: 250;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.drawing-controls-panel h3 {
+    font-weight: 400;
+    font-size: 0.9rem;
+}
+
+.stroke-controls {
+    width: 100%;
+    color: #1B1B1F;
+    display: flex;
+    flex-direction: column;
+}
+
+.stroke-controls-color-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.stroke-color-picker {
+    display: flex;
+    gap: 5px;
+}
+
+.stroke-color {
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    border: 2px solid #ffffff;
+    transition: transform 0.2s ease;
+    cursor: pointer;
+}
+
+.stroke-color:hover {
+    transform: scale(1.13);
+}
+
+.stroke-color.current-color-selected {
+    box-shadow: 0 0 0 1px #23affa;
+    transform: none;
+}
+
+.selected-color {
+    width: 34px;
+    height: 34px;
+    border-radius: 5px;
+    border: 2px solid #ffffff;
+    cursor: pointer;
+}
+
+.transparent-bg {
+    background-color: #fff;
+    background-image:
+        linear-gradient(45deg, #ccc 25%, transparent 25%),
+        linear-gradient(-45deg, #ccc 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #ccc 75%),
+        linear-gradient(-45deg, transparent 75%, #ccc 75%);
+    background-size: 10px 10px;
+    background-position:
+        0 0,
+        0 5px,
+        5px -5px,
+        -5px 0px;
+}
+
+.stroke-width-controls-panel {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+
+.stroke-width-info {
+    width: 100%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 10px;
+}
+
+.stroke-width {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    background-color: #F6F6F6;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.stroke-width:hover {
+    background-color: #e9e8ff;
+}
+
+.stroke-width.active {
+    background-color: #e0dffff1;
+}
+
+.stroke-width-icon {
+    background-color: #1B1B1F;
+    width: 60%;
+    border-radius: 50px;
+}
+
+.stroke-opacity-controls-panel {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.stroke-opacity-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.opacity-labels {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    font-size: 0.8rem;
+    position: relative;
+}

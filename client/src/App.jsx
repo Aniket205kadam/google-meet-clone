@@ -26,9 +26,18 @@ import VideoCallScreen from "./pages/videoCallScreen/VideoCallScreen";
 import Meeting from "./pages/meeting/main/Meeting";
 import { useWindowWidth } from "./hooks/useWindowWidth";
 import AudioCallScreen from "./pages/audioCallScreen/AudioCallScreen";
+import CollaborativeWhiteboard from "./components/whiteboard/CollaborativeWhiteboard";
 
 const AppRoutes = () => (
   <Routes>
+    <Route
+      path="/test"
+      element={
+        <ProtectedRoute>
+          <CollaborativeWhiteboard />
+        </ProtectedRoute>
+      }
+    />
     <Route
       path="/login"
       element={
@@ -134,7 +143,7 @@ const AppContent = () => {
   const [showMore, setShowMore] = useState(false);
 
   const { accessToken, isAuthenticated } = useSelector(
-    (state) => state.authentication
+    (state) => state.authentication,
   );
 
   const userService = new UserService(accessToken);
