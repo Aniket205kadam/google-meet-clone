@@ -63,7 +63,7 @@ public class BeanConfig {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Collections.singletonList(frontendUrl));
+        configuration.setAllowedOrigins(List.of(frontendUrl, "http://localhost:5173"));
         configuration.setExposedHeaders(List.of("Set-Cookie"));
         configuration.setAllowedHeaders(Arrays.asList(
                 ORIGIN,
