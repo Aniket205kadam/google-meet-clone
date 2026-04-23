@@ -163,3 +163,61 @@
     font-size: 0.8rem;
     position: relative;
 }
+
+/* action controls panel */
+.action-controls-panel {
+    height: 50px;
+    background-color: #ffffff;
+    position: absolute;
+    z-index: 100;
+    top: 2%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 10px;
+    display: flex;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 0 20px;
+}
+
+.action-option {
+    cursor: pointer;
+    height: 35px;
+    width: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+}
+
+.action-option.active {
+    background-color: #06c7f24b;
+}
+
+/* undo controls panel */
+.undo-controls-panel {
+    position: absolute;
+    bottom: 1%;
+    left: 2%;
+    display: flex;
+    gap: 10px;
+}
+
+.canvas-zoom-options, .undo-options {
+    display: flex;
+    background-color: #d2d1f4;
+    padding: 8px 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.undo-option, .redo-option, .zoom-in-option, .zoom-out-option {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
