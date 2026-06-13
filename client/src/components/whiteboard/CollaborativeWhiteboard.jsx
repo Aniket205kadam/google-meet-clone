@@ -82,7 +82,6 @@ const CollaborativeWhiteboard = () => {
   };
 
   const stopDrawing = () => {
-    console.log("points:", pointsRef.current);
     setDrawing(false);
     pointsRef.current = [];
   };
