@@ -16,8 +16,6 @@ import java.security.GeneralSecurityException;
 @RequiredArgsConstructor
 public class AuthenticationController {
 
-//    test ci/cd work flow - 1
-
     private final AuthenticationService service;
 
     @PostMapping("/login")
