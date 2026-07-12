@@ -66,7 +66,7 @@ jobs:
     steps:
       - name: Send Success email
         if: needs.build-deploy.result == 'success'
-        uses: dawidd6/action-send-mail@v3
+        uses: dawidd6/action-send-mail@42942bc2f8fba4e611b459a018967a6a7c78c68c
         with:
           server_address: ${{ secrets.MAIL_SERVER }}
           server_port: ${{ secrets.MAIL_PORT }}
@@ -83,7 +83,7 @@ jobs:
 
       - name: Send Failure email
         if: needs.build-deploy.result == 'failure'
-        uses: dawidd6/action-send-mail@v3
+        uses: dawidd6/action-send-mail@42942bc2f8fba4e611b459a018967a6a7c78c68c
         with:
           server_address: ${{ secrets.MAIL_SERVER }}
           server_port: ${{ secrets.MAIL_PORT }}
