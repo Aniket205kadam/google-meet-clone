@@ -72,6 +72,7 @@ jobs:
           server_port: ${{ secrets.MAIL_PORT }}
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
+          from: ${{ secrets.MAIL_USERNAME }}
           to: ${{ secrets.NOTIFICATION_EMAIL }}
           subject: "Namaskar Backend Build & Deploy Success"
           body: |
